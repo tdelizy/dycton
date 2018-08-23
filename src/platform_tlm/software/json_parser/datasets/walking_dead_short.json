@@ -1,0 +1,335 @@
+{
+  "id": 73,
+  "url": "http://www.tvmaze.com/shows/73/the-walking-dead",
+  "name": "The Walking Dead",
+  "type": "Scripted",
+  "language": "English",
+  "genres": [
+    "Drama",
+    "Action",
+    "Horror"
+  ],
+  "status": "Running",
+  "runtime": 60,
+  "premiered": "2010-10-31",
+  "officialSite": "http://www.amc.com/shows/the-walking-dead",
+  "schedule": {
+    "time": "21:00",
+    "days": [
+      "Sunday"
+    ]
+  },
+  "rating": {
+    "average": 8.5
+  },
+  "weight": 100,
+  "network": {
+    "id": 20,
+    "name": "AMC",
+    "country": {
+      "name": "United States",
+      "code": "US",
+      "timezone": "America/New_York"
+    }
+  },
+  "webChannel": null,
+  "externals": {
+    "tvrage": 25056,
+    "thetvdb": 153021,
+    "imdb": "tt1520211"
+  },
+  "image": {
+    "medium": "http://static.tvmaze.com/uploads/images/medium_portrait/136/340444.jpg",
+    "original": "http://static.tvmaze.com/uploads/images/original_untouched/136/340444.jpg"
+  },
+  "summary": "<p><b>The Walking Dead</b> tells the story of the months and years that follow after a zombie apocalypse. It follows a group of survivors, led by former police officer Rick Grimes, who travel in search of a safe and secure home. As the world overrun by the dead takes its toll on the survivors, their interpersonal conflicts present a greater danger to their continuing survival than the walkers that roam the country. Over time, the characters are changed by the constant exposure to death and some grow willing to do anything to survive.</p><p>Based on the comic book series of the same name by Robert Kirkman, Tony Moore, and Charlie Adlard.</p>",
+  "updated": 1511912209,
+  "_links": {
+    "self": {
+      "href": "http://api.tvmaze.com/shows/73"
+    },
+    "previousepisode": {
+      "href": "http://api.tvmaze.com/episodes/1336334"
+    },
+    "nextepisode": {
+      "href": "http://api.tvmaze.com/episodes/1336335"
+    }
+  },
+  "_embedded": {
+    "episodes": [
+      {
+        "id": 4095,
+        "url": "http://www.tvmaze.com/episodes/4095/the-walking-dead-1x01-days-gone-bye",
+        "name": "Days Gone Bye",
+        "season": 1,
+        "number": 1,
+        "airdate": "2010-10-31",
+        "airtime": "22:00",
+        "airstamp": "2010-11-01T02:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/0/2104.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/0/2104.jpg"
+        },
+        "summary": "<p>Rick searches for his family after emerging from a coma into a world terrorized by the walking dead. Morgan and Duane, whom he meets along the way, help teach Rick the new rules for survival.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4095"
+          }
+        }
+      },
+      {
+        "id": 4096,
+        "url": "http://www.tvmaze.com/episodes/4096/the-walking-dead-1x02-guts",
+        "name": "Guts",
+        "season": 1,
+        "number": 2,
+        "airdate": "2010-11-07",
+        "airtime": "22:00",
+        "airstamp": "2010-11-08T03:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3424.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3424.jpg"
+        },
+        "summary": "<p>Rick unknowingly causes a group of survivors to be trapped by walkers. The group dynamic devolves from accusations to violence, as Rick must confront an enemy far more dangerous than the undead.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4096"
+          }
+        }
+      },
+      {
+        "id": 4097,
+        "url": "http://www.tvmaze.com/episodes/4097/the-walking-dead-1x03-tell-it-to-the-frogs",
+        "name": "Tell It to the Frogs",
+        "season": 1,
+        "number": 3,
+        "airdate": "2010-11-14",
+        "airtime": "22:00",
+        "airstamp": "2010-11-15T03:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3425.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3425.jpg"
+        },
+        "summary": "<p>Rick makes a decision to go back to Atlanta to retrieve the bag of guns and save a man's life. Lori and Shane must deal with the surprising return of someone they thought was dead.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4097"
+          }
+        }
+      },
+      {
+        "id": 4098,
+        "url": "http://www.tvmaze.com/episodes/4098/the-walking-dead-1x04-vatos",
+        "name": "Vatos",
+        "season": 1,
+        "number": 4,
+        "airdate": "2010-11-21",
+        "airtime": "22:00",
+        "airstamp": "2010-11-22T03:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3426.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3426.jpg"
+        },
+        "summary": "<p>Rick's mission to Atlanta is jeopardized when things go awry. Jim becomes unhinged in camp.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4098"
+          }
+        }
+      },
+      {
+        "id": 4099,
+        "url": "http://www.tvmaze.com/episodes/4099/the-walking-dead-1x05-wildfire",
+        "name": "Wildfire",
+        "season": 1,
+        "number": 5,
+        "airdate": "2010-11-28",
+        "airtime": "22:00",
+        "airstamp": "2010-11-29T03:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3427.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3427.jpg"
+        },
+        "summary": "<p>Rick leads the group to the CDC after the attack. Jim must make a terrible life and death decision</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4099"
+          }
+        }
+      },
+      {
+        "id": 4100,
+        "url": "http://www.tvmaze.com/episodes/4100/the-walking-dead-1x06-ts-19",
+        "name": "TS-19",
+        "season": 1,
+        "number": 6,
+        "airdate": "2010-12-05",
+        "airtime": "22:00",
+        "airstamp": "2010-12-06T03:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3428.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3428.jpg"
+        },
+        "summary": "<p>Rick and the group are allowed into the CDC by a strange doctor. But all is not what it seems in their newfound haven.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4100"
+          }
+        }
+      },
+      {
+        "id": 4101,
+        "url": "http://www.tvmaze.com/episodes/4101/the-walking-dead-2x01-what-lies-ahead",
+        "name": "What Lies Ahead",
+        "season": 2,
+        "number": 1,
+        "airdate": "2011-10-16",
+        "airtime": "21:00",
+        "airstamp": "2011-10-17T01:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3429.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3429.jpg"
+        },
+        "summary": "<p>After the CDC explosion, the survivors are still on the move when they encounter a herd of walkers that separates one of their own, leading them to a possible safe haven.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4101"
+          }
+        }
+      },
+      {
+        "id": 4102,
+        "url": "http://www.tvmaze.com/episodes/4102/the-walking-dead-2x02-bloodletting",
+        "name": "Bloodletting",
+        "season": 2,
+        "number": 2,
+        "airdate": "2011-10-23",
+        "airtime": "21:00",
+        "airstamp": "2011-10-24T01:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3430.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3430.jpg"
+        },
+        "summary": "<p>Coming to the aid of another, Rick discovers a possible safe haven. Shane must go on a dangerous mission to get badly needed medical supplies.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4102"
+          }
+        }
+      },
+      {
+        "id": 4103,
+        "url": "http://www.tvmaze.com/episodes/4103/the-walking-dead-2x03-save-the-last-one",
+        "name": "Save the Last One",
+        "season": 2,
+        "number": 3,
+        "airdate": "2011-10-30",
+        "airtime": "21:00",
+        "airstamp": "2011-10-31T01:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3431.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3431.jpg"
+        },
+        "summary": "<p>The group desperately awaits Shane's return. Shane finds himself trapped in a school, surrounded by the undead. Daryl and Andrea search for someone in the woods.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4103"
+          }
+        }
+      },
+      {
+        "id": 4104,
+        "url": "http://www.tvmaze.com/episodes/4104/the-walking-dead-2x04-cherokee-rose",
+        "name": "Cherokee Rose",
+        "season": 2,
+        "number": 4,
+        "airdate": "2011-11-06",
+        "airtime": "21:00",
+        "airstamp": "2011-11-07T02:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3432.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3432.jpg"
+        },
+        "summary": "<p>Shane makes a deadly sacrifice which leads to unusual behavior and self-distancing. The rest of the group tries to hang on somewhere between living to die and dying to live.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4104"
+          }
+        }
+      },
+      {
+        "id": 4105,
+        "url": "http://www.tvmaze.com/episodes/4105/the-walking-dead-2x05-chupacabra",
+        "name": "Chupacabra",
+        "season": 2,
+        "number": 5,
+        "airdate": "2011-11-13",
+        "airtime": "21:00",
+        "airstamp": "2011-11-14T02:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3433.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3433.jpg"
+        },
+        "summary": "<p>Glenn, the only one breaking barriers between both groups, knows far too much for his comfort level. Daryl finds a sign of life and, in his delirium, tries to make it back to the farm alive.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4105"
+          }
+        }
+      },
+      {
+        "id": 4106,
+        "url": "http://www.tvmaze.com/episodes/4106/the-walking-dead-2x06-secrets",
+        "name": "Secrets",
+        "season": 2,
+        "number": 6,
+        "airdate": "2011-11-20",
+        "airtime": "21:00",
+        "airstamp": "2011-11-21T02:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3434.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3434.jpg"
+        },
+        "summary": "<p>Secrets are told and secrets are revealed. Hershel refuses to acknowledge the world’s new reality. Andrea comes out of her shell. Everyone is becoming more and more aware that “everything is food for something.”</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4106"
+          }
+        }
+      },
+      {
+        "id": 4107,
+        "url": "http://www.tvmaze.com/episodes/4107/the-walking-dead-2x07-pretty-much-dead-already",
+        "name": "Pretty Much Dead Already",
+        "season": 2,
+        "number": 7,
+        "airdate": "2011-11-27",
+        "airtime": "21:00",
+        "airstamp": "2011-11-28T02:00:00+00:00",
+        "runtime": 60,
+        "image": {
+          "medium": "http://static.tvmaze.com/uploads/images/medium_landscape/1/3435.jpg",
+          "original": "http://static.tvmaze.com/uploads/images/original_untouched/1/3435.jpg"
+        },
+        "summary": "<p>Hershel sets a deadline. All secrets are out in the open. Glenn stands up for himself and Shane takes charge.</p>",
+        "_links": {
+          "self": {
+            "href": "http://api.tvmaze.com/episodes/4107"
+          }
+        }
+      }
+    ]
+  }
+}

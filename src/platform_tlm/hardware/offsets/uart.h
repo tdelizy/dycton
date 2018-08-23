@@ -1,0 +1,10 @@
+#ifndef UART_H_OFFSETS
+#define UART_H_OFFSETS
+
+#define UART_FIFO_READ 0x0
+#define UART_STR_FIFO_WRITE 0x4
+#define UART_DEC_FIFO_WRITE 0x8
+#define UART_STR_FIFO_WRITE_DBG 0xc
+#define UART_DEC_FIFO_WRITE_DBG 0x10
+
+#endif
