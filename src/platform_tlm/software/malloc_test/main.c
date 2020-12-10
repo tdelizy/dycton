@@ -1,3 +1,29 @@
+/*
+
+This file is part of the Dycton simulator.
+This software aims to provide an environment for Dynamic Heterogeneous Memory 
+Allocation for embedded devices study. It is build using SystemC / TLM.
+It uses the MIPS32 ISS from the SocLib project (www.soclib.fr). 
+It also use one SimSoc module (https://gforge.inria.fr/projects/simsoc/)
+(originals athors credited in respective files)
+
+Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,42 +34,24 @@
 
 #define SIM_END            (*((int*)HELPER_BASE)=0)
 
-#define ALLOC_SZ           (24)
-#define NB_ALLOC            (120)
-
-
-void test();
-
-int global_test[1024];
-
-void tempo_dbg(int * nop)
-{
-    for (int i = 0; i < 1024; i++) {
-        global_test[i] = i;
-        nop = &global_test[i % 5];
-    }
-}
 
 int main(void)
 {
     printf("\n\n\n================== Basic test for DYCTON ==================\n");
     printf("(TDk @ CITI Lab)\n\n");
 
-	FILE * test_fd = NULL;
 	char* test_mem = malloc(100 * sizeof(char));
-	memset((void*)test_mem, (int)'P', 100);
-	test_fd = fmemopen((void*)test_mem, 100, "rb");
-	rewind(test_fd);
-	char buffer = 0;
-	for (int i = 0; i < 50; i++) {
-		if (i % 4 == 0) {
-			printf("\n");
-			printf("[%d] ", i / 4);
-		}
-		fread(&buffer, sizeof(char), 1, test_fd);
-		if (i < 50)
-			printf("%d(%d) ", buffer, *(char*)((int)test_mem + i));
-	}
+	free(test_mem);
+	test_mem = malloc(10 * sizeof(char));
+	free(test_mem);
+	test_mem = malloc(23);
+	free(test_mem);
+    test_mem = malloc(124);
+    test_mem = malloc(240);
+	test_mem = malloc(496);
+	free(test_mem);
+
+
 
     printf("\n\ndone");
     printf("\n=========================== THE END ===========================\n");
@@ -51,6 +59,7 @@ int main(void)
     return 0;
 error:
     printf("\nFAILURE\n");
+    exit(1);
     return 0;
 }
 

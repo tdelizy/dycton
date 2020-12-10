@@ -9,8 +9,11 @@
 
 #include "cdjpeg.h"     /* Common decls for cjpeg/djpeg applications */
 
-#include "jpeg_app.h"   // build time definition of the application parameters
+#include "dycton_jpeg_app.h"   // build time definition of the application parameters
                         // see that file for changing dataset used or coding/decoding function
+
+#define JPG_IN_SZ dataset_in_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define JPG_OUT_SZ dataset_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
 
 #define LIBJPEG_TRACE_LVL           (3)
 
@@ -348,7 +351,7 @@ int main(void)
     fclose(out_image_ptr);
 
 
-    printf("\n========================================== THE END ==========================================\n");
+    printf("\n======================================= THE END ==========================================\n");
 
     exit(ret);
     return 0;         /* suppress no-return-value warnings */

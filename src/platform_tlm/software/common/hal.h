@@ -1,6 +1,8 @@
 /********************************************************************
  * Copyright (C) 2009, 2012 by Verimag                              *
  * Initial author: Matthieu Moy                                     *
+ *                                                                  *
+ * Inclusion and adaptation : Tristan Delizy, 2019                  *
  ********************************************************************/
 
 /*!
@@ -20,7 +22,7 @@ typedef char *caddr_t;
 // #define DYCTON_DBG
 #ifdef DYCTON_DBG
 // trace the syscall used by newlib
-// #define SYSCALL_PRINT
+#define SYSCALL_PRINT
 #endif
 
 #ifndef EOF
@@ -74,7 +76,7 @@ void print_hexL(long num);
 do {                                                                    \
     if ( !(x) ) {                                                       \
         print("ASSERTION FAILED: (");print(#x);print(")\n");            \
-        exit(-2);                                                       \
+        exit(42);                                                       \
     }                                                                   \
 } while (0)
 

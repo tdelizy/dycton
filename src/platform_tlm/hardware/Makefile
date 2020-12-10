@@ -7,7 +7,7 @@ ROOT=..
 include $(ROOT)/Makefile.common
 
 EXTRALDLIBS += -L../hardware -lhardware -L../elf-loader -lloader
-CXXEXTRAFLAGS = -I../hardware -I.. -D$(DY_SOFT) -DDY_ARCH=$(DY_ARCH)
+CXXEXTRAFLAGS = -I../hardware -I.. -D$(DY_SOFT)
 CEXTRAFLAGS = -I.
 
 %.o: %.cpp $(filter-out %.d, $(MAKEFILE_LIST))

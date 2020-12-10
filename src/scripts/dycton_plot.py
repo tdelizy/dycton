@@ -1,6 +1,28 @@
 #!/usr/bin/python
 
-import os, sys, getopt, time, math
+
+# This file is part of the Dycton project scripts.
+# This software aims to provide an environment for Dynamic Heterogeneous Memory
+# Allocation for embedded devices study.
+
+# Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+from __future__ import print_function
+import os, sys, getopt, time, math, subprocess, pprint
 
 from datetime import datetime, timedelta
 from decimal import *
@@ -13,12 +35,45 @@ import matplotlib.lines as lines
 
 import numpy as np
 
-sys.path.append('../../')
+# plot visual scheme definition
+# c = color
+# m = marker
+# l = label
+plot_config = { "baseline":{"c":'blue', "m":'v', "l":'Fast First', "ls":"-"},
+                "ilp_upper_bound":{"c":'black', "m":'*', "l":'Upper Bound', "ls":"--"},
+                "ilp":{"c":'red', "m":'o', "l":'ILP', "ls":"-"},
+                "den":{"c":'green', "m":'d', "l":'Freq. acces / octet', "ls":"-"},
+                "profile":{"c":'darkorange', "m":'x', "l":'Alloc Site Profile', "ls":"-"},
+                "profile-enhanced":{"c":'purple', "m":'x', "l":'Alloc Site Enhanced', "ls":"-"},
+                "profile-ilp":{"c":'cyan', "m":'o', "l":'Alloc Site ILP Profile', "ls":"-"}}
+
+def usage():
+  print("\n================================================================================")
+  print("Usage")
+  print("================================================================================")
+  print("-i \"filepath\": input csv file path")
+  print("-p : paper output (smaller image size, increased text size.")
+  print("plotting whats described in the xp_config.py in current directory, fallback to the xp_config.py present in .. otherwise. ")
+  print("exiting...")
 
 
-# output format : paper or curves for general usage
-# paper_output = True
-paper_output = True
+def stack_dict_search(d, value, default=None):
+    # try to find a value inside nested dicts, return default (None) if not found, return corresponding key if found
+    stack = [iter(d.items())]
+    while stack:
+        for k, v in stack[-1]:
+            if isinstance(v, dict):
+                stack.append(iter(v.items()))
+                break
+            elif v == value:
+                return k
+        else:
+            stack.pop()
+    return default
+
+
+
+prp = pprint.PrettyPrinter(indent=0)
 
 def robust_max(index, *args):
   to_max=[]
@@ -28,240 +83,377 @@ def robust_max(index, *args):
       except:
         pass
   if len(to_max) == 0:
-    print "ERROR: none of arguments is valid."
+    print("\n/!\\ ERROR: none of arguments is valid.")
     sys.exit(1)
   return max(to_max)
 
 
 def main():
-  # command line arguments processing
+  print("Dycton plot script")
+  print("================================================================================")
+  print("author: T. Delizy (delizy.tristan@gmail.com)")
+  print(str(datetime.now()))
+  print("")
+
+  global plot_config
+
+  print("> command line arguments processing ... ", end=' ')
   try:
-    opts, args = getopt.getopt(sys.argv[0:], "", [""])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:hp', ['help'])
+    # print "opts :", opts
+    # print "args :", args
   except getopt.GetoptError as err:# print help information and exit:
-    print str(err)  # will print something like "option -a not recognized"
+    print(str(err))  # will print something like "option -a not recognized"
     sys.exit(2)
 
+  input_csv = ""
+  paper_output = False
 
-  if(len(args)>1):
-    print "args", args
-    xp_folder = args[-1]
-    res_folder = xp_folder+"offline_placements/"
-  else:
-    # create folder for result simulators and embedded softwares
-    res_folder = "offline_placement_generation_"+date
-  
-  verbose = False
-  input_csv = args[-1]
+  for o, a in opts:
+    if o in ("-i"):
+      input_csv = a
+    elif o in ("-h", "--help"):
+      usage()
+      sys.exit(0)
+    elif o in ("-p"):
+      paper_output = True
 
+  if input_csv == "":
+    print("\n/!\\no data provided (try with -i path_to_csv)")
+    print("exiting...")
+    exit(1)
+  print("done.\n")
+
+
+  print("> experiment configuration file loading ...", end=' ')
   try:
+    sys.path.append('.')
     import xp_config as xp
-    print "import from config file OK."
   except:
-    print "CONFIG IMPORT FAILED !"
-    sys.exit(1)
-    
-  target_sw = xp.target_sw
-  target_hw = xp.target_hw
-  target_strats = xp.target_strats
-
-
-  # construct x ticks and label
-  arch_ref = [0,5,10,25,50,75,100]
-  # arch_ref = [100,75,50,25,10,5,0]
-  arch = []
-
-  if paper_output:
-    arch_names_ref = ["A6\n0% ","A5\n5%","A4\n  10%","A3\n25%","A2\n50%","A1\n75%","A0\n100%"]
-  else:
-    arch_names_ref = ["A6\n0%","A5\n5%","A4\n10%","A3\n25%","A2\n50%","A1\n75%","A0\n100%"]
-  arch_names = []
-
-  for hw in target_hw:
-    arch.append(arch_ref[len(arch_ref)-int(hw)-1])
-    arch_names.append(arch_names_ref[len(arch_ref)-int(hw)-1])
-
-  print "arch = ", arch
-  print "arch names = ", arch_names
+    print("\nCONFIG IMPORT FAILED FROM CURRENT DIRECTORY!")
+    print("trying to get config from ../../", end=' ')
+    try:
+      sys.path.append('../../')
+      import xp_config as xp
+    except:
+      print("\n/!\\no config file could be loaded, aborting.")
+      sys.exit(1)
 
 
 
 
-  print "=================================="
-  print "parsing allocation log"
-  print "=================================="
-  # sorted by request date (generated in that order)
-  data = np.genfromtxt(input_csv, dtype=None, delimiter=';', names=True)
+  print("done.\n")
 
-  # print data
-
-  x = arch
-  # target_sw = ["h263"]
-  # target_sw = ["jpeg", "json_parser", "dijkstra", "jpg2000" , "h263"]
+  print("> loaded config : ")
+  print("\t Apps :", xp.target_sw)
+  print("\t Archis : ", xp.target_hw)
+  print("\t Strategies : ", xp.target_strats)
+  print("\t Datasets : ", xp.target_datasets)
 
 
+  print("> constructing result structure ... ", end=' ')
+  results = {}
+  for sw in xp.target_sw:
+    results[sw] = {}
+    for hw in xp.target_hw:
+      results[sw][hw] = {}
+      if hw in [ "0", "6"]:
+        results[sw][hw]["baseline"] = {}
+        for d in xp.target_datasets:
+          results[sw][hw]["baseline"][d] = -1
+          # add result baseline
+          # print sw, "on arch", hw, "strategy baseline", "dataset", str(d)
+      else :
+        for strat in xp.target_strats:
+            results[sw][hw][strat] = {}
+            for d in xp.target_datasets:
+              # add result for given strategy, hw, sw and dataset
+              results[sw][hw][strat][d] = -1
+              # print sw, "on arch", hw, "strategy", strat, "dataset", str(d)
+  print("done.\n")
 
-  for i, sw in enumerate(target_sw):
-    print "sw=", sw
-    y_speedup_baseline = []
-    idx_baseline = []
-    y_speedup_ilp =[]
-    idx_ilp = []
-    y_speedup_ilp_50p =[]
-    idx_ilp_50p = []
-    y_speedup_ilp_85p =[]
-    idx_ilp_85p = []
-    y_speedup_nofrag =[]
-    idx_nofrag = []
-    y_speedup_density =[]
-    idx_density = []
-    y_speedup_density_50p =[]
-    idx_density_50p = []
-    y_speedup_density_85p =[]
-    idx_density_85p = []
-    for j in range(len(data)):
-      if data['experience'][j] == sw+"_arch6_run_baseline":
-      	ref_arch6 = data[j]['final_cycles']
-      	# print "REFERENCE EXEC TIME =", ref_arch6
-      if sw in data['experience'][j] and "baseline" in data['experience'][j]:
-      	idx_baseline.append(j)
-      if sw in data['experience'][j] and "nofrag" in data['experience'][j]:
-      	idx_nofrag.append(j)
-      if sw in data['experience'][j] and "ilp" in data['experience'][j]:
-      	idx_ilp.append(j)
-      if sw in data['experience'][j] and "ilp_50" in data['experience'][j]:
-      	idx_ilp_50p.append(j)
-      if sw in data['experience'][j] and "ilp_85" in data['experience'][j]:
-      	idx_ilp_85p.append(j)
-      if sw in data['experience'][j] and "density" in data['experience'][j]:
-      	idx_density.append(j)
-      if sw in data['experience'][j] and "density_50" in data['experience'][j]:
-      	idx_density_50p.append(j)
-      if sw in data['experience'][j] and "density_85" in data['experience'][j]:
-      	idx_density_85p.append(j)
+  print("================================================================================")
+  print("data retrieving and preparation")
+  print("================================================================================")
+  print("> parsing allocation log ... ", end=' ')
+  data = np.genfromtxt(input_csv, dtype=None, delimiter=';', names=True, encoding=None)
+  print("done.\n")
 
-    if "ilp_upper_bound" in target_strats:
-      idx_ilp = [val for val in idx_ilp if val not in idx_nofrag]
-    if "ilp_50" in target_strats:
-      idx_ilp = [val for val in idx_ilp if val not in idx_ilp_50p]
-    if "ilp_85" in target_strats:
-      idx_ilp = [val for val in idx_ilp if val not in idx_ilp_85p]
-    if "density_50" in target_strats:
-      idx_density = [val for val in idx_density if val not in idx_density_50p]
-    if "density_85" in target_strats:
-      idx_density = [val for val in idx_density if val not in idx_density_85p]
+  print("> start of parsed data:")
+  print(data.dtype.names)
+  print(data[1:min(len(data)-1, 6)])
+  print("...\n")
 
 
-    # architectures are ordered from A0 to A6, but we want to display from 0% of fast memory to 100%
-    # i.e. from A6 to A0, so we reverse the lists:
-    if "baseline" in target_strats:
-      for t in data[idx_baseline]['final_cycles']:
-        y_speedup_baseline.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_baseline = y_speedup_baseline[::-1]
-    if "ilp_upper_bound" in target_strats:
-      for t in data[idx_nofrag]['final_cycles']:
-        y_speedup_nofrag.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_nofrag = y_speedup_nofrag[::-1]
-    if "ilp" in target_strats:
-      for t in data[idx_ilp]['final_cycles']:
-        y_speedup_ilp.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_ilp = y_speedup_ilp[::-1]
-    if "ilp_50" in target_strats:
-      for t in data[idx_ilp_50p]['final_cycles']:
-        y_speedup_ilp_50p.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_ilp_50p = y_speedup_ilp_50p[::-1]
-    if "ilp_85" in target_strats:
-      for t in data[idx_ilp_85p]['final_cycles']:
-        y_speedup_ilp_85p.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_ilp_85p = y_speedup_ilp_85p[::-1]
-    if "density" in target_strats:
-      for t in data[idx_density]['final_cycles']:
-        y_speedup_density.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_density = y_speedup_density[::-1]
-    if "density_50" in target_strats:
-      for t in data[idx_density_50p]['final_cycles']:
-        y_speedup_density_50p.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_density_50p = y_speedup_density_50p[::-1]
-    if "density_85" in target_strats:
-      for t in data[idx_density_85p]['final_cycles']:
-        y_speedup_density_85p.append((float(ref_arch6)-float(t))/float(ref_arch6)*100)
-      # y_speedup_density_85p = y_speedup_density_85p[::-1]
+  print("> populating result structure... ", end=' ')
+  for j in range(len(data)):
+    xp_name = data['experience'][j]
+    cur_sw = xp_name.split("arch")[0].strip("_")
+    cur_hw = xp_name.split("arch")[1].split("_")[0]
+    cur_ds = int(xp_name.split("arch")[1].split("_")[1].strip("d"))
+    cur_strat = xp_name.split("arch")[1].strip("_run").split(cur_hw+"_d"+str(cur_ds)+"_")[1]
+
+    # debug output of every simulation ran
+    # print(xp_name)
+    # print("sw = ", cur_sw)
+    # print("hw = ", cur_hw)
+    # print("dataset = ", cur_ds)
+    # print("strat = ", cur_strat)
+    try:
+      results[cur_sw][cur_hw][cur_strat][cur_ds] = int(data['final_cycles'][j])
+    except:
+      continue
+      print("\n/!\\ data inconsistent with xp_config file !")
+      print("exiting ...")
+      exit(1)
+  print("done.\n")
 
 
-    # ilp strategy as max(ilp, ilp85%, ilp50%)
-    y_speedup_ilp_merged = []
-    for i in range(max(len(y_speedup_ilp), max(len(y_speedup_ilp_50p), len(y_speedup_ilp_85p)))):
-      y_speedup_ilp_merged.append(robust_max(i, y_speedup_ilp,y_speedup_ilp_50p,y_speedup_ilp_85p))
+  for i, sw in enumerate(xp.target_sw):
+    print("================================================================================")
+    print("plotting", sw)
+    print("================================================================================", "\n\n")
 
-    # density strategy as max(density, density85%, density50%)
-    y_speedup_density_merged = []
-    for i in range(max(len(y_speedup_density), max(len(y_speedup_density_50p), len(y_speedup_density_85p)))):
-      y_speedup_density_merged.append(robust_max(i, y_speedup_density,y_speedup_density_50p,y_speedup_density_85p))
+    arch_x_names = {"6":"0%", "5":"5%", "4":" 10%", "3":"25%", "2":"50%", "1":"75%", "0":"100%" }
+    arch_x_values = {"6":0, "5":5, "4":10, "3":25, "2":50, "1":75, "0":100 }
+
+    arch = []
+    arch_names = []
+    y_min = 100
+    y_max = 0
+    for hw in xp.target_hw:
+      arch.append(arch_x_values[hw])
+      arch_names.append(arch_x_names[hw])
+
+    print("arch = ", arch)
+    print("arch names = ", arch_names)
+    print("strats =", xp.target_strats)
 
 
-    print "=================================="
-    print "plotting"
-    print "=================================="
+    # create plot
     script_dpi = 80
-    plt.close('all')
-
     if paper_output:
       f, ax = plt.subplots(1, 1, figsize=(500/script_dpi, 350/script_dpi), dpi=script_dpi)
-      line_w = 1
+      line_w = 1.2
+      markersize = 7
+      capsize = 4
+      elw = 0.7
     else:
       f, ax = plt.subplots(1, 1, figsize=(1000/script_dpi, 700/script_dpi), dpi=script_dpi)
       line_w = 2
+      markersize = 8
+      capsize = 8
+      elw = 1
+    # plot strats
+    # results[cur_sw][cur_hw][cur_strat][cur_ds]
+    ilp_strats = []
+    den_strats = []
+    adjustment_x = -0.4
+    adjustment_x_val = 0.2
+    for s in xp.target_strats:
+      x = []
+      y = {"avg":[], "down":[], "up":[]}
+      if s in ["baseline", "ilp_upper_bound", "profile", "profile-enhanced", "profile-ilp"]:
+        for hw in sorted(results[sw].keys(), key=str.lower, reverse=True):
+          if s in results[sw][hw]:
+            x.append(arch_x_values[hw]+ adjustment_x)
+            speedups = []
+            for k,v in results[sw][hw][s].items():
+              if k in xp.target_datasets:
+                speedups.append((float(results[sw]["6"]["baseline"][k]) - float(v))/float(results[sw]["6"]["baseline"][k])*100)
+            avg = sum(speedups)/ float(len(speedups))
+            y["avg"].append(avg)
+            y["down"].append(avg - min(speedups))
+            y["up"].append(max(speedups) - avg)
+            if min(speedups) < y_min:
+              y_min = min(speedups)
+            if max(speedups) > y_max:
+              y_max = max(speedups)
+
+        eb = ax.errorbar(x, y["avg"],
+          yerr=[y["down"], y["up"]],
+          color=plot_config[s]["c"],
+          linestyle=plot_config[s]["ls"],
+          marker=plot_config[s]["m"],
+          markersize=markersize,
+          capsize=capsize,
+          lw=line_w,
+          elinewidth=elw,
+          clip_on=False,
+          label=plot_config[s]["l"] )
+
+        adjustment_x += adjustment_x_val
+
+      elif "ilp" in s:
+        ilp_strats.append(s)
+      elif "den" in s:
+        den_strats.append(s)
+
+    if ilp_strats != []:
+      x = []
+      y = {"avg":[], "down":[], "up":[]}
+      for hw in sorted(results[sw].keys(), key=str.lower, reverse=True):
+        # print "HW=", hw
+        speedups = []
+        if ilp_strats[0] in results[sw][hw].keys():
+          for d in results[sw][hw][ilp_strats[0]].keys():
+            val = 0
+            for s in ilp_strats:
+              try:
+                if results[sw][hw][s][d] > 0:
+                  test = (float(results[sw]["6"]["baseline"][d]) - float(results[sw][hw][s][d]))/float(results[sw]["6"]["baseline"][d])*100
+                else:
+                  test = 0
+              except:
+                test = 0
+                pass
+              if test > val:
+                val = test
+            if d in xp.target_datasets:
+              speedups.append(val)
+          x.append(arch_x_values[hw]+ adjustment_x)
+          avg = sum(speedups)/ float(len(speedups))
+          y["avg"].append(avg)
+          y["down"].append(avg - min(speedups))
+          y["up"].append(max(speedups) - avg)
+          if min(speedups) < y_min:
+            y_min = min(speedups)
+          if max(speedups) > y_max:
+            y_max = max(speedups)
+      eb = ax.errorbar(x, y["avg"],
+        yerr=[y["down"], y["up"]],
+        color=plot_config["ilp"]["c"],
+        linestyle=plot_config["ilp"]["ls"],
+        marker=plot_config["ilp"]["m"],
+        markersize=markersize,
+        capsize=capsize,
+        lw=line_w,
+        elinewidth=elw,
+        clip_on=False,
+        label=plot_config["ilp"]["l"])
+
+      adjustment_x += adjustment_x_val
 
 
-    # speedup
-    if "baseline" in target_strats:
-      ax.plot(x, y_speedup_baseline, color='blue', marker='v', lw=line_w, clip_on=False, label="Fast First")
-    if "ilp_upper_bound" in target_strats:
-      ax.plot(x[1:-1], y_speedup_nofrag, color='black', marker='*', markersize=12, lw=line_w*2, linestyle='--', clip_on=False, label="Upper Bound")
-    if "ilp" in target_strats or "ilp_50" in target_strats or "ilp85" in target_strats:
-      ax.plot(x[1:-1], y_speedup_ilp_merged, color='red', marker='o', lw=line_w, clip_on=False, label="ILP")
-    if "density" in target_strats or "density_50" in target_strats or "density85" in target_strats:
-      ax.plot(x[1:-1], y_speedup_density_merged, color='green', marker='d', lw=line_w, clip_on=False, label="Density")
+    if den_strats != []:
+      x = []
+      y = {"avg":[], "down":[], "up":[]}
+      for hw in sorted(results[sw].keys(), key=str.lower, reverse=True):
+        # print "HW=", hw
+        speedups = []
+        if den_strats[0] in results[sw][hw].keys():
+          for d in results[sw][hw][den_strats[0]].keys():
+            val = 0
+            for s in den_strats:
+              try:
+                if results[sw][hw][s][d] > 0:
+                  test = (float(results[sw]["6"]["baseline"][d]) - float(results[sw][hw][s][d]))/float(results[sw]["6"]["baseline"][d])*100
+              except:
+                test = 0
+                pass
+              if test > val:
+                val = test
+            if d in xp.target_datasets:
+              speedups.append(val)
+          x.append(arch_x_values[hw]+ adjustment_x)
+          avg = sum(speedups)/ float(len(speedups))
+          y["avg"].append(avg)
+          y["down"].append(avg - min(speedups))
+          y["up"].append(max(speedups) - avg)
+          if min(speedups) < y_min:
+            y_min = min(speedups)
+          if max(speedups) > y_max:
+            y_max = max(speedups)
+      eb = ax.errorbar(x, y["avg"],
+        yerr=[y["down"], y["up"]],
+        color=plot_config["den"]["c"],
+        linestyle=plot_config["den"]["ls"],
+        marker=plot_config["den"]["m"],
+        markersize=markersize,
+        capsize=capsize,
+        lw=line_w,
+        elinewidth=elw,
+        clip_on=False,
+        label=plot_config["den"]["l"])
+
+      adjustment_x += adjustment_x_val
 
     for a in arch:
       ax.plot([a,a] , [-100, 100], lw=0.5, linestyle='--',color='grey', zorder=0)
 
-
     plt.xticks(arch, arch_names)
-    ax.set_xlim([0, 100])
-    ax.set_ylim([min(0, min(y_speedup_baseline)), max(y_speedup_baseline)])
+    ax.set_xlim([-0.7, 100.7])
+    ax.set_ylim([y_min - 0.5, y_max + 0.5])
 
     ax.tick_params(axis='both', which='major', labelsize=11)
 
-    if paper_output:
-      ax.legend(loc='lower right', bbox_to_anchor=(1, 0.04), ncol=2, fontsize=11)
-    else:
-      ax.legend(loc='lower right', bbox_to_anchor=(1, 0.04), ncol=2, fontsize=14)
 
-    # label work
+    handles, labels = ax.get_legend_handles_labels()
+    if len(xp.target_datasets) > 1:
+      extraString = "(Average,\nmin and max)"
+      handles.append(patches.Patch(color='none', label=extraString))
+      ax.legend(handles=handles)
+
+
     if paper_output:
+      ax.legend(loc='lower right', bbox_to_anchor=(1, 0), ncol=2, fontsize=11, handles=handles)
       ax.set_xlabel('Fraction of heap in fast memory', fontsize=13)
-      ax.set_ylabel('Speedup (%)', fontsize=13)
+      ax.set_ylabel('Execution Time Reduction (%)', fontsize=13)
+      title_sz = 13
     else:
+      ax.legend(loc='lower right', bbox_to_anchor=(1, 0.04), ncol=2, fontsize=14, handles=handles)
       ax.set_xlabel('Fraction of heap in fast memory', fontsize=16)
-      ax.set_ylabel('Speedup (%)', fontsize=16)
+      ax.set_ylabel('Execution Time Reduction (%)', fontsize=16)
+      title_sz = 16
 
-    # ax2.set_ylabel('Time in allocator (%)', fontsize=16)
+
+
     if sw == "json_parser":
-      ax.set_title("json")
+      ax.set_title("json", fontsize=title_sz)
     else:
-      ax.set_title(sw)
+      ax.set_title(sw, fontsize=title_sz)
+
 
     f.tight_layout()
 
+    strat_string = ""
+    dataset_string = ""
+    arch_string = ""
+
+    for s in xp.target_strats:
+      if s == "baseline":
+        strat_string+= "ff-"
+      if s == "ilp":
+        strat_string+= "ilp-"
+      if s == "density":
+        strat_string+= "freq-"
+      if s == "profile":
+        strat_string+= "prof-"
+      if s == "profile-enhanced":
+        strat_string+= "profEN-"
+      if s == "profile-ilp":
+        strat_string+= "profILP-"
+    strat_string = strat_string[0:-1]
+
+    for a in xp.target_hw:
+      arch_string+= a+"-"
+    arch_string = arch_string[0:-1]
+
+    for d in xp.target_datasets:
+      dataset_string+= str(d)+"-"
+    dataset_string = dataset_string[0:-1]
+
+
+    plt.savefig(sw+"_A("+arch_string+")D("+dataset_string+")S("+strat_string+").pdf", dpi=330)
+
+
+    # show it to the world
     plt.show()
 
 
-
-  sys.exit()
-
+    # exit(0)
 
 
 
 if __name__ == "__main__":
     main()
-

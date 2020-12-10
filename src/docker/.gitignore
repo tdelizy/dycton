@@ -1,0 +1,5 @@
+# git exclusion file
+
+# files
+*.bin
+*.out

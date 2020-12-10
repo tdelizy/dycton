@@ -1,3 +1,29 @@
+/*
+
+This file is part of the Dycton simulator.
+This software aims to provide an environment for Dynamic Heterogeneous Memory 
+Allocation for embedded devices study. It is build using SystemC / TLM.
+It uses the MIPS32 ISS from the SocLib project (www.soclib.fr). 
+It also use one SimSoc module (https://gforge.inria.fr/projects/simsoc/)
+(originals athors credited in respective files)
+
+Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #ifndef LOG_TRACE_H
 #define LOG_TRACE_H
 
@@ -6,30 +32,35 @@
 #include <map>
 #include "platform_time.h"
 
+//==============================================================================
+// Simulation global variables
+//==============================================================================
+
 extern uint32_t colors_in_uart_output;
 
+class MemArchi;
+extern MemArchi* dy_mem_arch;
 extern const uint32_t heap_base;
-extern const uint32_t heap_end;
+extern uint32_t heap_end;
+extern uint32_t heap_size;
 extern uint32_t heap_footprint;
+
 extern uint32_t Strategy;
+
 extern uint32_t malloc_fallback;
 extern uint32_t malloc_count;
 extern uint64_t malloc_cycles;
 extern uint64_t free_cycles;
 extern uint64_t total_size_allocated;
 
+extern uint32_t Dataset_index;
+
 //==============================================================================
 // defines
 //==============================================================================
 
-#define DEFAULT_STRAT_STRING "default"
-#define ORACLE_STRAT_STRING "oracle"
-
-#define STRAT_COUNT 2
 //------------------------------------------------------------------------------
-
-
-
+// debug traces activation defines
 #define WRAPPER_ID 0
 //------------------------------------------------------------------------------
 #define MEM_ID 1
@@ -52,10 +83,12 @@ extern uint64_t total_size_allocated;
 //------------------------------------------------------------------------------
 
 
+//------------------------------------------------------------------------------
+// names and definitions for logging
 #define LOG_NAME(x) (std::string()+"../logs/"+x+".log").c_str()
 
 #define MEM_LOG_ACC_HEADERS "time_cycles;r_count;w_count;address"
-#define MEM_LOG_OBJ_HEADERS "addr;size;malloc_date_cycles;lifespan_cycles;r_count;w_count;alloc_order;free_order"
+#define MEM_LOG_OBJ_HEADERS "addr;size;malloc_date_cycles;lifespan_cycles;r_count;w_count;alloc_order;free_order;alloc_site;fallback"
 
 #define LOG_COMMENT_STR "#" // default value from numpy
 
@@ -97,15 +130,15 @@ class LogTraceModDef {
 };
 
 
-// mapping bus @ on requests
+// Memory Architecture Descriptor (MAD)
 
 class MemBank {
     public:
         MemBank(std::string n, unsigned int st, unsigned int sz, unsigned int rl, unsigned int wl)
-            { this->name = n; this->start = st; this->size = sz; this->rlat = rl; this->wlat = wl;
-                std::cout << "creating interval : "<< this->name << " " << this->start << " " << this->size << std::endl; }
+            { this->name = n; this->base_ad = st; this->size = sz; this->rlat = rl; this->wlat = wl;
+                std::cout << "creating interval : "<< this->name << " " << this->base_ad << " " << this->size << std::endl; }
         std::string name;
-        unsigned int start;
+        unsigned int base_ad;
         unsigned int size;
         unsigned int rlat;
         unsigned int wlat;
@@ -114,8 +147,7 @@ class MemBank {
 class MemArchi {
     public:
         MemBank** banks;
-        int size, index;
-        MemArchi(int nb): size(nb), index(0) { this->banks = new MemBank*[nb]; }
+        MemArchi(int nb, int arch): size(nb), index(0), simID(arch) { this->banks = new MemBank*[nb]; }
         ~MemArchi(){ delete[] this->banks; }
         void add(std::string n, unsigned int st, unsigned int sz, unsigned int rl, unsigned int wl){
             if(index<this->size)
@@ -128,11 +160,17 @@ class MemArchi {
         void print(std::ostream &os){
             for(int i=0;i<this->index;i++){
                 os << std::dec << this->banks[i]->name << ":" <<
-                this->banks[i]->start << ":" << this->banks[i]->size << ":" <<
+                this->banks[i]->base_ad << ":" << this->banks[i]->size << ":" <<
                 this->banks[i]->rlat << ":" << this->banks[i]->wlat << std::endl;
             }
         }
+        uint32_t get_heap_count(){return this->index;}
+        void set_architecture_id(int id){this->simID = id;}
+        int get_architecture_id(){return this->simID;}
+    private:
+        int size, index, simID;
 };
+
 
 
 // log aggregation in memory
@@ -150,13 +188,15 @@ class AggregatedAccesses {
 // object moritoring
 class LoggedObj {
     public:
-        LoggedObj(uint64_t date, uint32_t sz, uint32_t order)
-            {this->r = 0; this->w = 0; size = sz; malloc_date = date; this->alloc_order = order;}
+        LoggedObj(uint64_t date, uint32_t sz, uint32_t ra, uint32_t order, uint32_t fb)
+            {this->r = 0; this->w = 0; size = sz; malloc_date = date; alloc_site = ra; this->alloc_order = order; this->fallback = fb;}
         uint32_t r;
         uint32_t w;
         uint32_t size;
+        uint32_t alloc_site;
         uint64_t malloc_date; // in platform cycles
         uint32_t alloc_order; // ordering relative to malloc/free calls
+        uint32_t fallback; // does this object has been fallbacked into slow ?
 };
 
 // log module
@@ -172,7 +212,7 @@ public:
 
     void log_access(uint32_t addr, bool write_op);
 
-    void log_malloc(uint32_t addr, uint32_t size);
+    void log_malloc(uint32_t addr, uint32_t size, uint32_t alloc_site, uint32_t fallback);
     void log_free(uint32_t addr);
 
     void log_flush_end();

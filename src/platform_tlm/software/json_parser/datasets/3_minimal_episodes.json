@@ -1,0 +1,130 @@
+{
+  "id":12 ,
+  "url": "minimal test",
+  "name": "minimal test",
+  "type": "minimal test",
+  "language": "minimal test",
+  "genres": [
+    "minimal test",
+    "minimal test",
+    "minimal test"
+  ],
+  "status": "minimal test",
+  "runtime":12 ,
+  "premiered": "minimal test",
+  "officialSite": "minimal test",
+  "schedule": {
+    "time": "minimal test",
+    "days": [
+      "minimal test"
+    ]
+  },
+  "rating": {
+    "average": 12
+  },
+  "weight":12 ,
+  "network": {
+    "id":12 ,
+    "name": "minimal test",
+    "country": {
+      "name": "minimal test",
+      "code": "minimal test",
+      "timezone": "minimal test"
+    }
+  },
+  "webChannel": {
+    "id":12 ,
+    "name": "minimal test",
+    "country": {
+      "name": "minimal test",
+      "code": "minimal test",
+      "timezone": "minimal test"
+    }
+  },
+  "externals": {
+    "tvrage":12 ,
+    "thetvdb":12 ,
+    "imdb": "minimal test"
+  },
+  "image": {
+    "medium": "minimal test",
+    "original": "minimal test"
+  },
+  "summary": "minimal test",
+  "updated":12 ,
+  "_links": {
+    "self": {
+      "href": "minimal test"
+    },
+    "previousepisode": {
+      "href": "minimal test"
+    }
+  },
+  "_embedded": {
+    "episodes": [
+      {
+        "id":12 ,
+        "url": "minimal test",
+        "name": "minimal test",
+        "season":12 ,
+        "number":12 ,
+        "airdate": "minimal test",
+        "airtime": "minimal test",
+        "airstamp": "minimal test",
+        "runtime":12 ,
+        "image": {
+          "medium": "minimal test",
+          "original": "minimal test"
+        },
+        "summary": "minimal test",
+        "_links": {
+          "self": {
+            "href": "minimal test"
+          }
+        }
+      },
+      {
+        "id":12 ,
+        "url": "minimal test",
+        "name": "minimal test",
+        "season":12 ,
+        "number":12 ,
+        "airdate": "minimal test",
+        "airtime": "minimal test",
+        "airstamp": "minimal test",
+        "runtime":12 ,
+        "image": {
+          "medium": "minimal test",
+          "original": "minimal test"
+        },
+        "summary": "minimal test",
+        "_links": {
+          "self": {
+            "href": "minimal test"
+          }
+        }
+      },
+      {
+        "id":12 ,
+        "url": "minimal test",
+        "name": "minimal test",
+        "season":12 ,
+        "number":12 ,
+        "airdate": "minimal test",
+        "airtime": "minimal test",
+        "airstamp": "minimal test",
+        "runtime":12 ,
+        "image": {
+          "medium": "minimal test",
+          "original": "minimal test"
+        },
+        "summary": "minimal test",
+        "_links": {
+          "self": {
+            "href": "minimal test"
+          }
+        }
+      }
+    ]
+  }
+}

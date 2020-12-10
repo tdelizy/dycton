@@ -1,6 +1,28 @@
 #!/usr/bin/python
 
-import os, sys, getopt, time, math
+
+# This file is part of the Dycton project scripts.
+# This software aims to provide an environment for Dynamic Heterogeneous Memory
+# Allocation for embedded devices study.
+
+# Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+from __future__ import print_function
+import os, sys, getopt, time, math, subprocess
 
 from datetime import datetime, timedelta
 from decimal import *
@@ -9,513 +31,334 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.ticker as ticker
 import matplotlib.patches as patches
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib as mpl
 
 import numpy as np
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 log_temporal_resolution = -1
 log_spatial_resolution = -1
 heap_base = -1
+save_name = "heap_occupation.png"
 
 class Memory_range:
-  def __init__(self, name, offset, size):
+  def __init__(self, name, offset, size, rlat, wlat):
     self.name = name
-    self.offset = offset
-    self.size = size
+    self.offset = int(offset)
+    self.size = int(size)
+    self.rlat = int(rlat)
+    self.wlat = int(wlat)
 
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def usage():
-  print "usage : use it.\n"
+  print("usage : provide execution log files as arguments\n")
+  print("options:")
+  print("\t-t app : allow to specify target application \n\t (in jpg2000, ecdsa, h263, json_parser, dijkstra and jpeg)")
+  print("\t-s symbol table file : will generate a color map by allocation site to color objects")
+  print("\t-c : plot the occupation of heap without objects hotness information display")
+  print("\t-h : this")
+  print("\t-V : verbose, prints more")
+  print("\nscript for plotting the heap occupation (memory space in function of time) of an execution")
+  print("\nexample usage (from repository iss folder, where you just ran a simulation):")
+  print("  python ../../scripts/log_process.py ../logs/*")
 
-def file_len(fname):
-  i=-1
-  with open(fname) as f:
-    for i, l in enumerate(f):
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def to_hex(x, pos):
+    return '0x%x' % int(x)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def plot_simple_alloc_boxes(allocs, mem_arch):
+  global save_name
+  plt.close('all')
+  f, ax = plt.subplots(1, 2, sharey=True, gridspec_kw = {'width_ratios':[7, 1]},figsize=(10, 10))
+  # plotting the graph
+  # [addr, size, alloc_date, lifespan, nb_r, nb_w, nb_rw, den_v1, nb_alloc_lifespan, den_v2, alloc_site, den_v3]
+  for i, a in enumerate(allocs):
+    ax[0].add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='lightsteelblue', edgecolor='black',linewidth=0.1))
+
+  #limits
+  #compute the highest object top
+  highest_heap_obj = allocs[np.where((allocs[:,0]+allocs[:,1]) == max(allocs[:,0]+allocs[:,1]))[0][0]]
+  #compute the latest object end
+  latest_heap_obj = allocs[np.where((allocs[:,2]+allocs[:,3]) == max(allocs[:,2]+allocs[:,3]))[0][0]]
+
+  max_x_val = max(allocs[:,15])
+  max_y_val = highest_heap_obj[0] + highest_heap_obj[1]
+  min_y_val = min(allocs[:,0])
+
+  # generating memory zones separation lines and legend
+  for i, m in enumerate(mem_arch):
+    y_label = min((m.offset+m.size), max_y_val)-50
+    description = m.name + "\n  R lat. " + str(m.rlat)+ "\n  W lat. " + str(m.wlat)
+    ax[0].plot((0,max_x_val),(m.offset,m.offset), linestyle='--', color='black')
+    if(i != len(mem_arch)-1):
+      ax[1].add_patch(patches.Rectangle((0, m.offset), 1, (mem_arch[i+1].offset-m.offset), facecolor='white', edgecolor='black'))
+    else:
+      ax[1].add_patch(patches.Rectangle((0, m.offset), 1, m.size, facecolor='white', edgecolor='black'))
+    ax[1].patch.set_facecolor('grey')
+    ax[1].text(0.03, y_label, description, fontsize=10, verticalalignment='top')
+    ax[1].set_xticks([])
+    ax[1].set_yticks([])
+
+  ax[0].set_xlim([0, max_x_val])
+  ax[0].set_ylim([min_y_val, max_y_val])
+  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val)/2,16))))
+  tick_range_x =  int(pow(10, math.floor(math.log(max_x_val, 10)+0.5))/4)
+  ax[0].get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
+  ax[0].get_yaxis().get_major_formatter().set_useOffset(False)
+  fmt = ticker.FuncFormatter(to_hex)
+  ax[0].get_yaxis().set_major_formatter(fmt)
+  ax[0].get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
+  # label work
+  ax[0].set_xlabel('Time (cycles)', fontsize=16)
+  ax[0].set_ylabel('Heap address', fontsize=16)
+
+  #show it to the world
+  plt.savefig(save_name, dpi=480)
+  plt.show()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def get_cmap(n, name='nipy_spectral_r'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def plot_alloc_boxes_by_site(allocs, mem_arch, symbol_table_file):
+  global save_name
+
+  plt.close('all')
+  f, ax = plt.subplots(1, 2, sharey=True, gridspec_kw = {'width_ratios':[7, 1]},figsize=(15, 10))
+
+  cmap_size = len(np.unique(allocs[:,10]))
+  print("cmap_size =", cmap_size)
+  cmap_site_map = {}
+
+  print(np.unique(allocs[:,10]).argsort())
+  print(np.unique(allocs[:,10])[np.unique(allocs[:,10]).argsort()])
+
+  for i, site_addr in enumerate(np.unique(allocs[:,10])[np.unique(allocs[:,10]).argsort()].astype(int)):
+    print("alloc site = ", str(hex(site_addr)))
+    pathname = os.path.dirname(sys.argv[0])
+    print("pathname = "+pathname)
+    try :
+      p = subprocess.Popen([pathname+'/symfinder.py', symbol_table_file, str(hex(site_addr))], stdout=subprocess.PIPE,encoding='utf8')
+    except:
+      p = subprocess.Popen([os.getcwd()+'/symfinder.py', symbol_table_file, str(hex(site_addr))], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,encoding='utf8')
       pass
-  return i + 1
+    p.wait()
+    if p.returncode:
+      print("returncode :", p.returncode)
+      print("ERROR when retrieving symbol for address", hex(site_addr))
+      sys.exit(1)
 
+    for line in p.stdout:
+      print(line)
+      func_name = line.split(" ")[0]
+      offset = int(line.split(" ")[1])
+      legend_text = func_name+" +"+str(hex(int(offset)))
+      if legend_text[0] == "_":
+        legend_text = " "+legend_text
+      if "ERROR" in line:
+        print("ERROR when retrieving symbol for address", str(site_addr))
+        sys.exit(1)
 
+    cmap_site_map[site_addr] = {"index": i, "legend_text": legend_text}
 
-
-def map_range(low, high, amap):
-  low_match = False
-  high_match = False
-  res = []
-  for i, m in enumerate(amap):
-    if m.offset < high and (m.offset + m.size)> low:
-      print "appending", m.name
-      res.append(m)
-  return res
-
-
-
-def data_cut(mem, threshold):
-  ind = np.argsort(mem[:,2]); #order access by @
-  cuts = []
-  data = mem[ind]
-  for index, access in enumerate(data[2:]):
-    if data[index+1][2] - data[index][2] > threshold:
-      cuts.append(index+1)
-  mem_cuts = np.vsplit(data, cuts)
-  return mem_cuts
-
-
-
-def plot_scatter_RW_access(mem, amap):
-  ind = np.argsort(mem[:,2]); #order access by @
-  r_points =np.array([])
-  w_points =np.array([])
-  data = mem[ind]
-  print data
-  cur_addr = 0
-  r_count = 0
-  w_count = 0
-  for index, access in enumerate(data[2:]):
-    if cur_addr != access[2]:
-      r_points = np.append(r_points, r_count)
-      w_points = np.append(w_points,w_count)
-      cur_addr = access[2]
-      r_count=0
-      w_count=0
-    if access[1]>0:
-      w_count+=1
-    else:
-      r_count+=1
-
-  plt.close('all')
-  f, ax = plt.subplots(1, 1)
-
-  #plotting the graph
-  ax.scatter(r_points,w_points, marker='+')
-
-  # label work
-  ax.set_xlabel('Read count', fontsize=16)
-  ax.set_ylabel('Write count', fontsize=16)
-  ax.set_title("R/W scatter by address")
-
-  #show it to the world
-  plt.show()
-
-def plot_simple_alloc_boxes(allocs):
-  global heap_base
-
-  plt.close('all')
-  f, ax = plt.subplots(1, 1)
+  my_cmap = get_cmap(cmap_size);
+  lp = lambda i: patches.Patch(facecolor=my_cmap(cmap_site_map[i]["index"]), edgecolor='b', label=cmap_site_map[i]["legend_text"])
+  handles = [lp(i) for i in np.unique(allocs[:,10])[np.unique(allocs[:,10]).argsort()]]
 
   # plotting the graph
   for i, a in enumerate(allocs):
-    # matplotlib.patches.Rectangle(xy, width, height, angle=0.0, **kwargs)
-    ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='steelblue', edgecolor='black',linewidth=0.1))
+    ax[0].add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor=my_cmap(cmap_site_map[a[10]]["index"]), edgecolor='black',linewidth=0.2))
 
   #limits
   #compute the highest object top
   highest_heap_obj = allocs[np.where((allocs[:,0]+allocs[:,1]) == max(allocs[:,0]+allocs[:,1]))[0][0]]
-  #compute the latest object end
-  latest_heap_obj = allocs[np.where((allocs[:,2]+allocs[:,3]) == max(allocs[:,2]+allocs[:,3]))[0][0]]
-
-  max_x_val = latest_heap_obj[2] + latest_heap_obj[3]
+  max_x_val = max(allocs[:,15])
   max_y_val = highest_heap_obj[0] + highest_heap_obj[1]
   min_y_val = min(allocs[:,0])
 
-  ax.set_xlim([0, max_x_val])
-  ax.set_ylim([min_y_val, max_y_val])
-  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val),16))))
+  # generating memory zones separation lines and legend
+  for i, m in enumerate(mem_arch):
+    y_label = min((m.offset+m.size), max_y_val)-50
+    description = m.name + "\n  R lat. " + str(m.rlat)+ "\n  W lat. " + str(m.wlat)
+    ax[0].plot((0,max_x_val),(m.offset,m.offset), linestyle='--', color='black')
+    if(i != len(mem_arch)-1):
+      ax[1].add_patch(patches.Rectangle((0, m.offset), 1, (mem_arch[i+1].offset-m.offset), facecolor='white', edgecolor='black'))
+    else:
+      ax[1].add_patch(patches.Rectangle((0, m.offset), 1, m.size, facecolor='white', edgecolor='black'))
+    ax[1].patch.set_facecolor('grey')
+    ax[1].text(0.03, y_label, description, fontsize=10, verticalalignment='top')
+    ax[1].set_xticks([])
+    ax[1].set_yticks([])
+
+  ax[0].set_xlim([0, max_x_val])
+  ax[0].set_ylim([min_y_val, max_y_val])
+  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val)/2,16))))
   tick_range_x =  int(pow(10, math.floor(math.log(max_x_val, 10)+0.5))/4)
-  ax.get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
-  ax.get_yaxis().get_major_formatter().set_useOffset(False)
-  ax.get_yaxis().set_major_formatter(ticker.FormatStrFormatter("0x%X"))
-  ax.get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
-
+  ax[0].get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
+  ax[0].get_yaxis().get_major_formatter().set_useOffset(False)
+  fmt = ticker.FuncFormatter(to_hex)
+  ax[0].get_yaxis().set_major_formatter(fmt)
+  ax[0].get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
   # label work
-  ax.set_xlabel('Time (cycles)', fontsize=16)
-  ax.set_ylabel('Heap address', fontsize=16)
-  ax.set_title("Heap occupation ")
+  ax[0].set_xlabel('Time (cycles)', fontsize=16)
+  ax[0].set_ylabel('Heap address', fontsize=16)
+  ax[0].set_title("Heap occupation ")
+  plt.legend(handles=handles[0:10], loc='center left', bbox_to_anchor=(1, 0.5), fontsize=14)
 
   #show it to the world
-  # plt.savefig('heap_occupation.png', dpi=990)
+  f.tight_layout()
+  f.subplots_adjust(wspace=0, right = 0.7)
+  plt.savefig(save_name, dpi=330)
   plt.show()
 
-  print "Heap occupation in function of time saved"
-  # sys.exit(0)
 
-
-
-def plot_scatter_RW_obj(allocs):
-  print "plot_scatter_RW_obj"
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def plot_alloc_boxes(allocs, mem_arch):
+  global save_name
+  print("plot_alloc_boxes")
   plt.close('all')
-  f, ax = plt.subplots(1, 1)
-
-  obj_reads = allocs[:,4]
-  obj_writes = allocs[:,5]
-
-  # plotting the graph
-  ax.scatter(obj_reads,obj_writes, s=20, lw=0.1, color='black', alpha=0.3)
-
-  ax.set_xlim([0, max(obj_reads)])
-  ax.set_ylim([0, max(obj_writes)])
-
-  # label work
-  ax.set_xlabel("read count by object", fontsize=16)
-  ax.set_ylabel("write count by object", fontsize=16)
-  ax.set_title("R/W scatter by heap object with score")
-
-  # plt.savefig('plot_scatter_read_write_object_with classes.png', dpi=660)
-  #show it to the world
-  plt.show()
-
-def plot_alloc_boxes(allocs, score):
-  print "plot_alloc_boxes"
-
-
-
-  plt.close('all')
-  f, ax = plt.subplots(1, 1)
+  f, ax = plt.subplots(2, 2, gridspec_kw = {'width_ratios':[20, 5],'height_ratios':[20, 1]}, sharey='row', figsize=(12, 10))
+  f.delaxes(ax[1,1])
+  max_den = np.max(allocs[:,11], axis=0)
+  log_score = np.log(1+allocs[:,11])
+  min_log_score = log_score.min()
+  max_log_score = log_score.max()
+  b = 0.8 #color base factor
 
   # plotting the graph
   for i, a in enumerate(allocs):
-    # matplotlib.patches.Rectangle(xy, width, height, angle=0.0, **kwargs)
-    ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor=(score[i], 0, 1-score[i]), edgecolor='black',linewidth=0.2))
+    c = (log_score[i]-min_log_score)/(max_log_score-min_log_score)
+    if a[12] == 0:
+      ax[0,0].add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor=(b*(1-c),b*(1-c),b+0.1), edgecolor='none'))
+    else:
+      ax[0,0].add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor=(b+0.1,b*(1-c),b*(1-c)), edgecolor='none'))
 
   #limits
   #compute the highest object top
   highest_heap_obj = allocs[np.where((allocs[:,0]+allocs[:,1]) == max(allocs[:,0]+allocs[:,1]))[0][0]]
-  #compute the latest object end
-  latest_heap_obj = allocs[np.where((allocs[:,2]+allocs[:,3]) == max(allocs[:,2]+allocs[:,3]))[0][0]]
+  max_x_val = int(max(allocs[:,15]))
+  max_y_val = int(highest_heap_obj[0] + highest_heap_obj[1])
+  min_y_val = int(mem_arch[0].offset)
 
-  max_x_val = latest_heap_obj[2] + latest_heap_obj[3]
-  max_y_val = highest_heap_obj[0] + highest_heap_obj[1]
-  min_y_val = min(allocs[:,0])
-
-  ax.set_xlim([0, max_x_val])
-  ax.set_ylim([min_y_val, max_y_val])
-  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val),16))))
-  tick_range_x =  int(pow(10, math.floor(math.log(max_x_val, 10)+0.5))/4)
-  ax.get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
-  ax.get_yaxis().get_major_formatter().set_useOffset(False)
-  ax.get_yaxis().set_major_formatter(ticker.FormatStrFormatter("0x%X"))
-  ax.get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
-
-  # label work
-  ax.set_xlabel('Time (cycles)', fontsize=16)
-  ax.set_ylabel('Heap address', fontsize=16)
-  ax.set_title("Heap occupation with access pressure")
-
-  # plt.savefig('heap_occupation_with_preasure.png', dpi=990)
-  #show it to the world
-  plt.show()
-  # sys.exit(0)
-
-
-def plot_selective_boxes(objects, scores) :
-  plt.close('all')
-  f, ax = plt.subplots(1, 1)
-
-  # we want the 10% objects with the highest score
-  # we can't assume the scores to be normalized
-  score_percentage_threshold = 0.5
-  print "threshold =", score_percentage_threshold
-
-  ordered_scores = scores[np.argsort(scores)];
-
-  score_threshold_val = ordered_scores[int(round(len(ordered_scores)*score_percentage_threshold))]
-  print "score_threshold_val=", score_threshold_val
-  idx_score = np.where(scores > score_threshold_val)
-  print "idx_score", idx_score
-  print "selected scores", scores[idx_score]
-
-  print "len scores", len(scores)
-  print "len selec",  len(scores[idx_score])
-
-  print "max =", max(scores[idx_score])
-  print "min =", min(scores[idx_score])
-
-
-
-
-  size_percentage_threshold = 0.9
-
-  ordered_sizes = objects[np.argsort(objects[:,1])]
-
-  size_threshold_val = ordered_sizes[int(round(len(ordered_sizes)*size_percentage_threshold))][1]
-  print "size_threshold_val=", size_threshold_val
-  idx_size = np.where(objects[:,1] > size_threshold_val)
-  print "idx_size", idx_size
-  print "selected objects", objects[idx_size]
-
-  print "len objects", len(objects)
-  print "len selec",  len(objects[idx_size])
-
-  print "max =", max(objects[idx_size][:,1])
-  print "min =", min(objects[idx_size][:,1])
-
-  # plotting the graph
-  for i, a in enumerate(objects):
-    # matplotlib.patches.Rectangle(xy, width, height, angle=0.0, **kwargs)
-    # if i in idx_size[0] and i in idx_score[0]:
-    #   ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='red', edgecolor='none'))
-    # elif i in idx_size[0]:
-    #   ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='green', edgecolor='none'))
-    if i in idx_score[0]:
-      ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='red', edgecolor='none'))
+  # generating memory zones separation lines and legend
+  for i, m in enumerate(mem_arch):
+    y_label = min((m.offset+m.size), max_y_val)-50
+    description = m.name + "\n  R lat. " + str(m.rlat)+ "  W lat. " + str(m.wlat)
+    ax[0,0].plot((0,max_x_val),(m.offset,m.offset), linestyle='--', color='black')
+    if(i != len(mem_arch)-1):
+      ax[0,1].add_patch(patches.Rectangle((0, m.offset), 1, (mem_arch[i+1].offset-m.offset), facecolor='white', edgecolor='black'))
     else:
-      ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='grey', edgecolor='none',alpha=0.5))
+      ax[0,1].add_patch(patches.Rectangle((0, m.offset), 1, m.size, facecolor='white', edgecolor='black'))
+    ax[0,1].patch.set_facecolor('grey')
+    ax[0,1].text(0.03, y_label, description, fontsize=12, verticalalignment='top')
+    ax[0,1].set_xticks([])
+    ax[0,1].set_yticks([])
 
-
-  #limits
-  #compute the highest object top
-  highest_heap_obj = objects[np.where((objects[:,0]+objects[:,1]) == max(objects[:,0]+objects[:,1]))[0][0]]
-  #compute the latest object end
-  latest_heap_obj = objects[np.where((objects[:,2]+objects[:,3]) == max(objects[:,2]+objects[:,3]))[0][0]]
-
-  max_x_val = latest_heap_obj[2] + latest_heap_obj[3]
-  max_y_val = highest_heap_obj[0] + highest_heap_obj[1]
-  min_y_val = min(objects[:,0])
-
-  ax.set_xlim([0, max_x_val])
-  ax.set_ylim([min_y_val, max_y_val])
-  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val),16))))
+  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val)/2,16))))
   tick_range_x =  int(pow(10, math.floor(math.log(max_x_val, 10)+0.5))/4)
-  ax.get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
-  ax.get_yaxis().get_major_formatter().set_useOffset(False)
-  ax.get_yaxis().set_major_formatter(ticker.FormatStrFormatter("0x%X"))
-  ax.get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
-
+  ax[0,0].get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
+  ax[0,0].get_yaxis().get_major_formatter().set_useOffset(False)
+  fmt = ticker.FuncFormatter(to_hex)
+  ax[0,0].get_yaxis().set_major_formatter(fmt)
+  ax[0,0].get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
   # label work
-  ax.set_xlabel('Time (cycles)', fontsize=16)
-  ax.set_ylabel('Heap address', fontsize=16)
-  ax.set_title("Heap occupation with access pressure")
+  ax[0,0].set_xlabel('Time (cycles)', fontsize=16)
+  ax[0,0].set_ylabel('Heap address', fontsize=16)
 
-  # plt.savefig('heap_occupation_with_preasure.png', dpi=990)
+  ax[1,1].set_xticks([])
+  ax[1,1].set_yticks([])
+  ax[1,0].set_xticks([])
+  ax[1,0].set_yticks([])
+  cdict1 = {'red':  ((0.0, 1.0, 1.0),
+                    (1.0, 0.0, 0.0)),
+            'green':((0.0, 1.0, 1.0),
+                    (1.0, 0.0, 0.0)),
+            'blue': ((0.0, 1.0, 1.0),
+                    (1.0, 0.9, 0.9))
+        }
+
+  cmap_grad_test = LinearSegmentedColormap('cmap_grad_test', cdict1)
+  plt.register_cmap(cmap=cmap_grad_test)
+
+  ax[0,0].set_xlim([0, max_x_val])
+  ax[0,0].set_ylim([min_y_val, max_y_val])
+
+  norm = mpl.colors.Normalize(vmin=0, vmax=max_x_val)
+  grad_freq =  mpl.colorbar.ColorbarBase(ax[1,0], norm = norm, ticks=[], cmap=cmap_grad_test, orientation='horizontal')
+  ax[1,0].set_xlabel("less frequency per byte -> more frequency per byte", fontsize=12)
+
+  parch_ok = patches.Patch(facecolor=(0,0,1), edgecolor='b', label="Allocation in \ndestination heap")
+  parch_fallback = patches.Patch(facecolor=(1,0,0), edgecolor='b', label="Fallback to \nthe other heap")
+
+  handles = [parch_ok, parch_fallback]
+  ax[1,0].legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5), fontsize=12)
+
   #show it to the world
-  plt.show()
-  # sys.exit(0)
-
-def plot_alloc_boxes_with_access(allocs, mem, score):
-  global log_temporal_resolution
-  global log_spatial_resolution
-  global heap_base
-  print "plot_alloc_boxes_with_access"
-
-  obj_access_count = np.array([])
-  obj_lifespan = np.array([])
-  obj_size = np.array([])
-  obj_score = np.array([])
-
-  plt.close('all')
-  f, ax = plt.subplots(1, 1)
-
-  # plotting the graph
-  for i, a in enumerate(allocs):
-    # matplotlib.patches.Rectangle(xy, width, height, angle=0.0, **kwargs)
-    # ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor=(score[i], 0, 1-score[i], 0.5), edgecolor='black', linewidth=0.2))
-    ax.add_patch(patches.Rectangle((a[2], a[0] ), a[3], a[1], facecolor='none', edgecolor=(0,0,0,1), linewidth=1))
-
-
-  print "log temporal resoltion =", log_temporal_resolution, "cycles"
-  print "log spatial resoltion =", log_spatial_resolution, "bytes"
-
-  #plot accesses on top of allocations
-  for i, line in enumerate(mem):
-    if line[1]==0 and line[2]==0:
-        c = 'white'
-    if line[1] > 0 and line[2] > 0:
-        c = 'purple'
-    elif line[2] > 0:
-        c = 'red'
-    else:
-        c = 'blue'
-    # print "box color =", box_color
-    # matplotlib.patches.Rectangle(xy, width, height, angle=0.0, **kwargs)
-    ax.add_patch(patches.Rectangle((line[0], line[3] ), log_temporal_resolution, log_spatial_resolution, facecolor=c, edgecolor='none'))
-
-  #limits
-  #compute the highest object top
-  highest_heap_obj = allocs[np.where((allocs[:,0]+allocs[:,1]) == max(allocs[:,0]+allocs[:,1]))[0][0]]
-  #compute the latest object end
-  latest_heap_obj = allocs[np.where((allocs[:,2]+allocs[:,3]) == max(allocs[:,2]+allocs[:,3]))[0][0]]
-
-  max_x_val = latest_heap_obj[2] + latest_heap_obj[3]
-  max_y_val = highest_heap_obj[0] + highest_heap_obj[1]
-  min_y_val = min(allocs[:,0])
-
-  ax.set_xlim([0, max_x_val])
-  ax.set_ylim([min_y_val, max_y_val])
-  tick_range_y =  int(pow(16, math.floor(math.log((max_y_val - min_y_val),16))))
-  tick_range_x =  int(pow(10, math.floor(math.log(max_x_val, 10)+0.5))/4)
-  ax.get_yaxis().set_major_locator(ticker.MultipleLocator(tick_range_y))
-  ax.get_yaxis().get_major_formatter().set_useOffset(False)
-  ax.get_yaxis().set_major_formatter(ticker.FormatStrFormatter("0x%X"))
-  ax.get_xaxis().set_major_locator(ticker.MultipleLocator(tick_range_x))
-
-  # label work
-  ax.set_xlabel('simulated time (cycles)', fontsize=16)
-  ax.set_ylabel('heap address', fontsize=16)
-  ax.set_title("Heap occupation and accesses")
-  # ax.legend(handles, labels)
-
-  # plt.savefig('heap_occupation_with_accesses.png', dpi=990)
-  #show it to the world
+  plt.savefig(save_name, dpi=480)
+  f.tight_layout()
+  f.subplots_adjust(wspace=0, right = 1)
   plt.show()
 
 
-
-# def plot_alloc_hist(allocs, mem, amap):
-#   print "plot_alloc_hist"
-#   print "memory accesses data RAW:"
-#   print mem
-#   # print allocs
-
-#   obj_access_count = np.array([])
-#   obj_lifespan = np.array([])
-#   obj_size = np.array([])
-#   obj_score = np.array([])
-
-#   # computing access count to each object
-#   for i, a in enumerate(allocs):
-#     ac = len(np.where((mem[:,2]>=a[0]) & (mem[:,2]<=a[2]) & (mem[:,0]>=a[1]) & (mem[:,0]<=a[3]))[0])
-#     ls =  a[3]-a[1]
-#     sz = a[2]-a[0]
-#     # selecting memory accesses with @ inside the allocated memory zone during object lifetime
-#     if ls != 0 and sz != 0:
-#       obj_access_count = np.append(obj_access_count, ac)
-#       obj_lifespan = np.append(obj_lifespan, ls)
-#       obj_size = np.append(obj_size, sz)
-#       # print ">> [", i, "]\t", obj_access_count[i], "\t\t", obj_lifespan[i], "\t\t", obj_size[i], "\t\t", obj_access_count[i] / (obj_lifespan[i]*obj_size[i])
-#     else:
-#       print "alloc ignored (ac=", ac,", ls=", ls, "sz=", sz, ")"
-#       obj_access_count = np.append(obj_access_count, 0)
-#       obj_lifespan = np.append(obj_lifespan, 0)
-#       obj_size = np.append(obj_size, 0)
-
-#   for i in range(len(obj_access_count)):
-#     obj_score = np.append(obj_score, obj_access_count[i]/( obj_lifespan[i]*obj_size[i] ))
-
-
-#   obj_score_nrm = np.divide(obj_score, max(obj_score))
-
-#   # object class separation computations
-#   obj_nb = len(obj_access_count)
-#   low_sep = obj_nb/3
-#   high_sep = obj_nb*2/3
-
-#   print "obj count =", obj_nb
-#   print "low sep =", low_sep
-#   print "high sep =", high_sep
-
-#   partition = np.argpartition(obj_score_nrm, (low_sep, high_sep))
-#   idx_low = partition[range(0,low_sep)]
-#   idx_mid = partition[range(low_sep, high_sep)]
-#   idx_high = partition[range(high_sep, obj_nb)]
-
-#   obj_score_nrm_low = obj_score_nrm[idx_low]
-#   obj_score_nrm_mid = obj_score_nrm[idx_mid]
-#   obj_score_nrm_high = obj_score_nrm[idx_high]
-
-#   partition = np.argpartition(obj_access_count, (low_sep, high_sep))
-#   idx_low = partition[range(0,low_sep)]
-#   idx_mid = partition[range(low_sep, high_sep)]
-#   idx_high = partition[range(high_sep, obj_nb)]
-
-#   obj_access_count_low = obj_access_count[idx_low]
-#   obj_access_count_mid = obj_access_count[idx_mid]
-#   obj_access_count_high = obj_access_count[idx_high]
-
-#   print "len(obj_access_count_low) =", len(obj_access_count_low)
-#   print "len(obj_access_count_mid) =", len(obj_access_count_mid)
-#   print "len(obj_access_count_high) =", len(obj_access_count_high)
-
-#   partition = np.argpartition(obj_lifespan, (low_sep, high_sep))
-#   idx_low = partition[range(0,low_sep)]
-#   idx_mid = partition[range(low_sep, high_sep)]
-#   idx_high = partition[range(high_sep, obj_nb)]
-
-#   obj_lifespan_low = obj_lifespan[idx_low]
-#   obj_lifespan_mid = obj_lifespan[idx_mid]
-#   obj_lifespan_high = obj_lifespan[idx_high]
-
-#   partition = np.argpartition(obj_size, (low_sep, high_sep))
-#   idx_low = partition[range(0,low_sep)]
-#   idx_mid = partition[range(low_sep, high_sep)]
-#   idx_high = partition[range(high_sep, obj_nb)]
-
-#   obj_size_low = obj_size[idx_low]
-#   obj_size_mid = obj_size[idx_mid]
-#   obj_size_high = obj_size[idx_high]
-
-
-#   plt.close('all')
-#   f, ax = plt.subplots(4, 1)
-
-#   colors = ['red', 'tan', 'lime']
-#   #create legend
-#   handles = [patches.Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
-#   labels= ["1/3 lowest scores","1/3 medium scores", "1/3 highest scores"]
-
-#   ax[0].hist([obj_score_nrm_low, obj_score_nrm_mid, obj_score_nrm_high], 30, histtype='bar',stacked=True, color=colors)
-#   ax[0].set_xlabel('normalized score', fontsize=16)
-#   ax[0].set_ylabel('count', fontsize=16)
-#   ax[0].set_title("object score histogram")
-#   ax[0].legend(handles, labels)
-
-#   ax[1].hist([obj_access_count_low, obj_access_count_mid, obj_access_count_high], 30, histtype='bar',stacked=True, color=colors)
-#   ax[1].set_xlabel('access counts', fontsize=16)
-#   ax[1].set_ylabel('count', fontsize=16)
-#   ax[1].set_title("access histogram")
-#   ax[1].legend(handles, labels)
-
-#   ax[2].hist([obj_lifespan_low, obj_lifespan_mid, obj_lifespan_high], 30, histtype='bar',stacked=True, color=colors)
-#   ax[2].set_xlabel('lifespans (cycles)', fontsize=16)
-#   ax[2].set_ylabel('count', fontsize=16)
-#   ax[2].set_title("lifespan histogram")
-#   ax[2].legend(handles, labels)
-
-#   ax[3].hist([obj_size_low, obj_size_mid, obj_size_high], 30, histtype='bar',stacked=True, color=colors)
-#   ax[3].set_xlabel('sizes (Bytes)', fontsize=16)
-#   ax[3].set_ylabel('count', fontsize=16)
-#   ax[3].set_title("size histogram")
-#   ax[3].legend(handles, labels)
-
-
-#   # plt.savefig('object_histograms.png', dpi=660)
-#   #show it to the world
-#   plt.show()
-#   # sys.exit(0)
-
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
   global log_temporal_resolution
   global log_spatial_resolution
   global heap_base
+  global save_name
+  nocolor = False
+  alloc_site_info = False
+  app = ""
+  symbol_table_file = ""
+
   # command line arguments processing
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hV:", ["help"])
+    opts, args = getopt.getopt(sys.argv[1:], 's:t:hVc', ['help'])
   except getopt.GetoptError as err:# print help information and exit:
-    print str(err)  # will print something like "option -a not recognized"
+    print(str(err))  # will print something like "option -a not recognized"
     sys.exit(2)
 
   verbose = False
 
   for o, a in opts:
-    #print "option=", o, " arg=", a
+    # print "option=", o, " arg=", a
     if o == "-V":
-      print "script last modification : ", time.strftime('%m/%d/%Y-%H:%M', time.localtime(os.path.getmtime(sys.argv[0])))
+      print("script last modification : ", time.strftime('%m/%d/%Y-%H:%M', time.localtime(os.path.getmtime(sys.argv[0]))))
       verbose = True
+    elif o == "-t":
+      app = a
     elif o in ("-h", "--help"):
       usage()
       sys.exit()
+    elif o == "-c":
+      nocolor = True
+    elif o == "-s":
+      alloc_site_info = True
+      symbol_table_file = a
     else:
-      print "unhandled option :", o, a
+      print("unhandled option :", o, a)
       sys.exit(2)
+
+  print("nocolor = ", nocolor)
 
   # parsing
   if verbose:
-    print "=================================="
-    print "parsing files names"
-    print "=================================="
-    print "args = ", args
+    print("==================================")
+    print("parsing files names")
+    print("==================================")
+    print("args = ", args)
   for f in args:
     if verbose:
-      print "considering argument", f
+      print("considering argument", f)
     if os.path.basename(f) == "mem_access.log":
         mem_accesses_file_name = f
     elif os.path.basename(f) == "memory_architecture":
@@ -523,127 +366,194 @@ def main():
     elif os.path.basename(f) == "heap_objects.log":
       alloc_log_file_name = f
     elif verbose:
-      print "what is", f, "? (ignored)"
+      print("what is", f, "? (ignored)")
 
   if verbose:
-    print "=================================="
-    print "constructing platform address map"
-    print "=================================="
+    print("==================================")
+    print("constructing platform address map")
+    print("==================================")
+# loading memory architecture latencies
+  memory_arch = np.loadtxt(mem_arch_file_name, delimiter=':', dtype=object)
+  print(memory_arch)
+
+  path = os.path.dirname(os.path.abspath(alloc_log_file_name))
+  print("path :", path)
+  if "jpg2000" in path or "jpeg2000" in path:
+    app = "jpg2000"
+  elif "ecdsa" in path:
+    app = "ecdsa"
+  elif "h263" in path:
+    app = "h263"
+  elif "json_parser" in path:
+    app = "json_parser"
+  elif "dijkstra" in path:
+    app = "dijkstra"
+  elif "jpeg" in path:
+    app = "jpeg"
+  if alloc_site_info == True and app == "":
+    path += os.path.dirname(os.path.abspath(symbol_table_file))
+    if "jpg2000" in path or "jpeg2000" in path:
+      app = "jpg2000"
+    elif "ecdsa" in path:
+      app = "ecdsa"
+    elif "h263" in path:
+      app = "h263"
+    elif "json_parser" in path:
+      app = "json_parser"
+    elif "dijkstra" in path:
+      app = "dijkstra"
+    elif "jpeg" in path:
+      app = "jpeg"
+  try:
+    print("path.split(app)[-1]", path.split(app)[-1])
+    print("")
+    print("path.split(app)[-1].split(_run)[-1]", path.split(app)[-1].split("_run")[0])
+    print("")
+    if nocolor == True:
+      save_name = app + "_heap_usage_no_freq.pdf"
+    elif alloc_site_info == True:
+      save_name = app + "_heap_usage_alloc_site.pdf"
+    else:
+      save_name = app + "_heap_usage.pdf"
+  except:
+    save_name = "heap_usage.pdf"
+
+  print("figure name =", save_name)
   mem_arch = []
   addr_map_file = open(mem_arch_file_name,'r')
   addr_map_lines = addr_map_file.readlines()
   addr_map_file.close()
-  for line in addr_map_lines:
-    mem_arch.append(Memory_range(line.split(":")[0], int(line.split(":")[1]), int(line.split(":")[2])))
-    if verbose:
-      print mem_arch[-1].name, mem_arch[-1].offset, mem_arch[-1].size
+  if len(addr_map_lines) > 1:
+    for i, line in enumerate(addr_map_lines):
+      mem_arch.append(Memory_range(memory_arch[i][0], memory_arch[i][1], memory_arch[i][2], memory_arch[i][3], memory_arch[i][4]))
+      if verbose:
+        print(mem_arch[-1].name, mem_arch[-1].offset, mem_arch[-1].size, mem_arch[-1].rlat, mem_arch[-1].wlat)
+  else:
+    print("memarch[0]")
+    print(memory_arch)
+    mem_arch.append(Memory_range(memory_arch[0], memory_arch[1], memory_arch[2], memory_arch[3], memory_arch[4]))
 
   heap_base = mem_arch[0].offset
 
   if heap_base == -1:
-    print "unable to locate segment \"heap\" in address map file, exiting."
+    print("unable to locate segment \"heap\" in address map file, exiting.")
     exit(2)
   elif verbose:
-      print "heap base set at", heap_base
+      print("heap base set at", heap_base)
 
   if verbose:
-    print "=================================="
-    print "parsing allocation log"
-    print "=================================="
-  # sorted by request date (generated in that order)
-  alloc_log = np.loadtxt(alloc_log_file_name, delimiter=';', dtype=int)
+    print("==================================")
+    print("parsing allocation log")
+    print("==================================")
+# log parsing
+  objects_log = np.loadtxt(alloc_log_file_name, delimiter=';', dtype=int, converters={8: lambda s: int(s, 16)})
 
-  objects = np.array([[0,0,0,0,0,0]])
+# objects ranking / analysis
+  objects_data = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]], dtype = float)
 
-  for index, alloc in enumerate(alloc_log) :
-    # gather allocation infos
-    ad = alloc[0]
+  avg_den = 0
+
+  for index, alloc in enumerate(objects_log) :
+    # "addr;size;malloc_date_cycles;lifespan_cycles;r_count;w_count;alloc_order;free_order"
+    # ADDR
+    addr = alloc[0]
+    # ALLOC DATE CYCLES
+    alloc_date = alloc[2]
+    # SIZE
     size = alloc[1]
-    malloc_date = alloc[2]
-    lifespan = alloc[3]
-    r_count = alloc[4]
-    w_count = alloc[5]
-    # construct allocated object descriptor
-    obj_desc = np.array( [ad, size, malloc_date, lifespan, r_count, w_count], dtype=int)
-    # add to array
-    objects = np.vstack((objects, obj_desc))
-  # substracting heap base to addresses for readability
-  objects[:,0]-= heap_base
-  objects = np.delete(objects, 0, 0)
-  # order objects by allocation date
-  ind = np.argsort(objects[:,2]);
-  objects = objects[ind]
-
-  # compute application memory footprint
-  highest_heap_obj = objects[np.where((objects[:,0]+objects[:,1]) == max(objects[:,0]+objects[:,1]))[0][0]]
-  app_mem_footprint = highest_heap_obj[0] + highest_heap_obj[1]
-  print "FOOTPRINT=", app_mem_footprint
-
-  if verbose:
-    print "alloc log :"
-    print objects
-
-    print "=================================="
-    print "score computation"
-    print "=================================="
-  obj_score = np.array([])
-  obj_score_nrm = np.array([])
-
-  for a in objects:
-    if(a[1]*a[3])!=0:
-      obj_score = np.append(obj_score,float(a[4]+a[5])/float(a[1]*a[3]))
+    # NB READS
+    nb_r = alloc[4]
+    # NB WRITES
+    nb_w = alloc[5]
+    # NB READ + WRITES
+    nb_rw = nb_r + nb_w
+    # LIFESPAN
+    lifespan =  alloc[3]
+    free_date = alloc_date + lifespan
+    # /!\ OUTDATED
+    # DENSITY V1 (allocation lifespan as time)
+    if alloc[1] == 0 or alloc[3] == 0:
+      den_v1 = float(0)
     else:
-      if verbose:
-        print "object error :", a
-      obj_score = np.append(obj_score,float(0))
-      # exit(2)
+      den_v1 = float(alloc[4]+alloc[5])/float(alloc[1]*alloc[3]*10**-6)
 
-  obj_score_nrm = np.divide(obj_score, max(obj_score))
+    # NB ALLOC DURING LIFESPAN
+    after_alloc = objects_log[np.where(objects_log[:,6] > alloc[6])[0]][:,6]
+    before_free = objects_log[np.where(objects_log[:,6] < alloc[7])[0]][:,6]
+    overlaping_allocations = np.intersect1d(before_free, after_alloc, assume_unique=True)
+    nb_alloc_lifespan = 1 + len(overlaping_allocations) # taking into account self to avoid dividing by 0
+
+    # /!\ OUTDATED
+    # DENSITY V2 (alloction overlap as time)
+    if alloc[1] == 0:
+      den_v2 = float(0)
+    else:
+      den_v2 = float(alloc[4]+alloc[5])/float(alloc[1]*nb_alloc_lifespan)
+
+    # DENSITY V3 (R/W sensitive in function of memory technologies characteristics)
+    if alloc[1] == 0:
+      den_v3 = float(0)
+    else:
+      if len(mem_arch) >1:
+        den_v3 = float(alloc[4]*(mem_arch[1].rlat - mem_arch[0].rlat)+alloc[5]*(mem_arch[1].wlat - mem_arch[0].wlat))/float(alloc[1]*nb_alloc_lifespan)
+      else :
+        den_v3 = den_v2
+
+    avg_den += den_v3
+
+    # ALLOC_SITE ADDR
+    alloc_site = alloc[8]
+    # print "alloc_site =", hex(alloc_site)
+
+    # is the allocation fallbacked ?
+    fallback = alloc[9]
+
+    # allocation and free order
+    alloc_order = alloc[6]
+    free_order = alloc[7]
+
+
+    # construct data for ploting
+    objects_data = np.vstack((objects_data, [ 	addr,
+    											size,
+    											alloc_date,
+    											lifespan,
+    											nb_r,
+    											nb_w,
+    											nb_rw,
+    											den_v1,
+    											nb_alloc_lifespan,
+    											den_v2,
+    											alloc_site,
+    											den_v3,
+    											fallback,
+    											alloc_order,
+    											free_order,
+                                            free_date]))
+
+  objects_data = np.delete(objects_data, 0,0)
+
+  avg_den = float(avg_den)/len(objects_data)
+
+  print("average object density of the application :", avg_den)
+  print("caution : this is related to memory technologies latencies.")
+
+  print("objects_data length =", len(objects_data))
+
   if verbose:
-    print "=================================="
-    print "parsing memory accesses file"
-    print "=================================="
-  # header_extraction = open(mem_accesses_file_name,'r')
-  # first_lines = []
-  # buf = header_extraction.readline()
-  # while buf[0]=="#" and len(first_lines)<15:
-  #   first_lines.append(buf)
-  #   buf = header_extraction.readline()
-  # log_temporal_resolution = first_lines[1].split('=')[1]
-  # log_spatial_resolution = first_lines[2].split('=')[1]
-  # if verbose:
-  #   print "log temporal resoltion =", log_temporal_resolution, "cycles"
-  #   print "log spatial resoltion =", log_spatial_resolution, "bytes"
-  # mem_access = np.loadtxt(mem_accesses_file_name, delimiter=';', dtype=int) #should be faster
-  # # substracting heap base to the accesses for readability
-  # mem_access[:,3]-= heap_base
-
-  if verbose:
-    print "=================================="
-    print "basic stats extractions"
-    print "=================================="
-    print "simulated time run duration (cycles):", mem_access[-1][0]
-    print "program R/W ratio: (TODO)"
-
-
-    print "=================================="
-    print "plotting"
-    print "=================================="
-  # plot_scatter_RW_obj(objects)
-  plot_simple_alloc_boxes(objects)
-  # plot_selective_boxes(objects, obj_score_nrm)
-  # plot_alloc_boxes(objects, obj_score_nrm)
-  # plot_alloc_boxes_with_access(objects, mem_access, obj_score_nrm)
-
-  # plot_alloc_hist(allocations, mem_access, address_map)
+    print("==================================")
+    print("plotting")
+    print("==================================")
+  if nocolor == True:
+    plot_simple_alloc_boxes(objects_data, mem_arch)
+  elif alloc_site_info == True:
+    plot_alloc_boxes_by_site(objects_data, mem_arch, symbol_table_file)
+  else:
+    plot_alloc_boxes(objects_data, mem_arch)
+  sys.exit(0)
 
 
 
-  sys.exit(app_mem_footprint)
-
-
-
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if __name__ == "__main__":
     main()
-

@@ -46,10 +46,18 @@
  *
  *
  */
+
+#include "libdycton.h"
 #include "address_map.h"
-#include "h263_app.h"
+#include "hal.h"
 
+#include "dycton_h263_app.h"
 
+#define DATASET_SZ_IN               dataset_in_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define DATASET_SZ_OUT              dataset_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define DATASET_SZ_STREAM_OUT       dataset_stream_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+
+#define CMD_LINE_ENC_ARGV       command_lines_array[read_mem(HELPER_BASE + DATASET_INDEX)];
 
 
 
@@ -57,11 +65,17 @@
 
 FILE *streamfile;
 
+
 #ifdef DYCTON_RUN
 int main(void)
 {
     int argc = CMD_LINE_ENC_ARGC;
-    char *argv[] = CMD_LINE_ENC_ARGV;
+    char *argv[CMD_LINE_ENC_ARGC];
+    int target = read_mem(HELPER_BASE + DATASET_INDEX);
+    for (int i = 0; i < CMD_LINE_ENC_ARGC; i++){
+        argv[i]= command_lines_array[target][i];
+    }
+
 #else
 int main(int argc, char *argv[])
 {

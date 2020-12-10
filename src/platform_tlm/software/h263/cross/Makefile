@@ -14,7 +14,7 @@ TARGET_OBJDUMP = $(CROSS_COMPILE)objdump
 TARGET_READELF = $(CROSS_COMPILE)readelf
 
 INCLUDE = -I. -I.. -I../../.. -I../../common -I../../common/legacy
-TARGET_CFLAGS=-Wall -O3 $(CROSS_CFLAGS) $(INCLUDE) -D$(DY_SOFT) -DDY_ARCH=$(DY_ARCH) -ggdb
+TARGET_CFLAGS=-Wall -O3 $(CROSS_CFLAGS) $(INCLUDE) -D$(DY_SOFT) -ggdb
 LIBGCC:=$(shell $(TARGET_CC) $(CFLAGS) -print-libgcc-file-name)
 
 EXEC =  a.out
@@ -31,6 +31,8 @@ all: $(EXEC)
 
 $(EXEC): $(OBJS) ../../common/ldscript
 	$(TARGET_LD) -q $(CROSS_LDFLAGS) $(OBJS) -o $@ -T../../common/ldscript -L../../common -lc -lm $(LIBGCC)
+	$(TARGET_OBJDUMP) a.out -fpwd > a.asm
+	$(TARGET_OBJDUMP) a.out -t > symbol_table.txt
 	cp a.out ../../a.out
 
 
@@ -84,8 +86,3 @@ hal.o: ../../common/hal.c ../../../address_map.h ../../common/hal.h
 
 ../../common/ldscript: ../../common/ldscript.c ../../../address_map.h # not intuitive, but its a way to define the stack address ONLY in address_map.h
 	gcc -D$(DY_SOFT) -DDY_ARCH=$(DY_ARCH) $(INCLUDE) -P -E ../../common/ldscript.c -o ../../common/ldscript
-
-check-env:
-ifndef DY_ARCH
-    DY_ARCH=-1
-endif

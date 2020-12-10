@@ -83,7 +83,10 @@
 #include <jasper_includes/jasper.h>
 
 // dycton simulator definition
-#include "jpg2000_app.h"
+#include "dycton_jpg2000_app.h"
+
+#define JPG2000_IN_FILE_PATH dataset_array[read_mem(HELPER_BASE + DATASET_INDEX)]
+
 
 /******************************************************************************\
 *

@@ -1,25 +1,69 @@
+/*
+
+This file is part of the Dycton simulator.
+This software aims to provide an environment for Dynamic Heterogeneous Memory 
+Allocation for embedded devices study. It is build using SystemC / TLM.
+It uses the MIPS32 ISS from the SocLib project (www.soclib.fr). 
+It also use one SimSoc module (https://gforge.inria.fr/projects/simsoc/)
+(originals athors credited in respective files)
+
+Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #ifndef ADDRESS_MAP_H
 #define ADDRESS_MAP_H
 
-/* strategies for allocation */
-#define DEFAULT_STRATEGY 0
-#define ORACLE_STRATEGY 1
+/*
+In this file : 
+	- memory technologies under test timming definitions
+	- platform address map definition
+	- allocation strategy names and id for dispatcher definitions
 
+*/
+
+
+//------------------------------------------------------------------------------
+// MEMORY TECHNOLOGIES DEFINITION
+//------------------------------------------------------------------------------
 
 /* memory technologies under test */
+
+/* test memory */
 // #define MEM_FAST_RLAT (1)
 // #define MEM_FAST_WLAT (1)
-
 // #define MEM_SLOW_RLAT (10)
 // #define MEM_SLOW_WLAT (10)
 
+/* tech eVaderis : fast MRAM vs dense MRAM */
 #define MEM_FAST_RLAT (1)
 #define MEM_FAST_WLAT (3)
-
 #define MEM_SLOW_RLAT (2)
 #define MEM_SLOW_WLAT (30)
 
+/* tech intel SRAM vs RERAM*/
+// #define MEM_FAST_RLAT (1)
+// #define MEM_FAST_WLAT (1)
+// #define MEM_SLOW_RLAT (4)
+// #define MEM_SLOW_WLAT (4000)
 
+
+//------------------------------------------------------------------------------
+// ADDRESS_MAP
+//------------------------------------------------------------------------------
 /* base address required by MIPS processor */
 #define RESET_BASE              (0xBFC00000)
 #define RESET_SIZE              (0x00010000) // 64ko
@@ -36,134 +80,15 @@
 
 #define STACK_SIZE              (0x00080000) // 512ko
 #define STACK_TOP               (DATA_BASE + DATA_SIZE + STACK_SIZE)
+/*
+ * CAUTION ! 
+ *
+ * SIZE OF SPM BANKS SHOULD ALWAYS BE ROUNDED TO 16
+ * OTHERWISE MALLOC HEAPS MEMORY ZONES MAY BE UNALIGNED
+ * (need to check that in sbrk (hal.c) and in DLMalloc (newlib_malloc.c))
+ */
 
-
-/* HEAP MEMORY ARCHITECTURE EXPERIMENTS */
-/* The memories are ordered from the fastest to the slowest */
-/* all latencies in cycles */
-/* defined in function of memory footprint for experiment significance */
-
-#if defined(jpeg)
-#define APP_MEM_FOOTPRINT (235520)
-#elif defined(h263)
-#define APP_MEM_FOOTPRINT (1262320)
-#elif defined(dijkstra)
-#define APP_MEM_FOOTPRINT (10240)
-#elif defined(patricia)
-#define APP_MEM_FOOTPRINT (0)
-#elif defined(json_parser) // 14 40 170
-#define APP_MEM_FOOTPRINT (40960)
-#elif defined(malloc_test)
-#define APP_MEM_FOOTPRINT (131072)
-#elif defined(jpg2000)
-#define APP_MEM_FOOTPRINT (1705920)
-#else
-#define APP_MEM_FOOTPRINT (0x02000000) // wip (32Mo)
-#endif
-
-#define heap_front_align(x) (((x+8)/16)*16) //align heaps base on 16 Bytes
-
-#if (DY_ARCH == 0) /*----------------------------------------------------- FAST = 100% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT // 100 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_COUNT              (1)
-#define HEAP_SIZE               (HEAP_0_SIZE)
-#elif (DY_ARCH == 1) /*---------------------------------------------------- FAST = 75% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT*3/4 // 75 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap to ensure execution success
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#elif (DY_ARCH == 2) /*---------------------------------------------------- FAST = 50% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT/2 // 50 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap to ensure execution success
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#elif (DY_ARCH == 3) /*---------------------------------------------------- FAST = 25% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT/4 // 25 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap to ensure execution success
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#elif (DY_ARCH == 4) /*---------------------------------------------------- FAST = 10% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT/10 // 10 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap to ensure execution success
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#elif (DY_ARCH == 5) /*----------------------------------------------------- FAST = 5% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT/20 // 5 % of memory footprint
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap to ensure execution success
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#elif (DY_ARCH == 6) /*----------------------------------------------------- FAST = 0% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT // 100 % of memory footprint slow (0% fast)
-#define HEAP_0_RLAT             MEM_SLOW_RLAT
-#define HEAP_0_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (1)
-#define HEAP_SIZE               (HEAP_0_SIZE)
-#elif (DY_ARCH == -2) /*----------------------------------------------------- FAST = 100%,  SLOW = 100% */
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             APP_MEM_FOOTPRINT // relax size of high heap
-#define HEAP_0_RLAT             MEM_FAST_RLAT
-#define HEAP_0_WLAT             MEM_FAST_WLAT
-#define HEAP_1_BASE             heap_front_align(HEAP_0_BASE + HEAP_0_SIZE)
-#define HEAP_1_SIZE             APP_MEM_FOOTPRINT // relax size of slow heap
-#define HEAP_1_RLAT             MEM_SLOW_RLAT
-#define HEAP_1_WLAT             MEM_SLOW_WLAT
-#define HEAP_COUNT              (2)
-#define HEAP_SIZE               (HEAP_1_BASE + HEAP_1_SIZE - HEAP_BASE)
-#else /*--------------------------------------------------------------------*/
-#define HEAP_BASE               heap_front_align(STACK_TOP)
-#define HEAP_0_BASE             (HEAP_BASE)
-#define HEAP_0_SIZE             (0x02000000) // 32Mo
-#define HEAP_0_RLAT             (1)
-#define HEAP_0_WLAT             (1)
-#define HEAP_COUNT              (1)
-#define HEAP_SIZE               (HEAP_0_SIZE)
-#endif
-
-
-
-
+#define HEAP_BASE               (STACK_TOP)
 
 // SPM access addresses from the bus
 #define SPM_BASE                (0x00000000)
@@ -174,8 +99,8 @@
 #define SPM_S_BASE              (SPM_D_BASE + DATA_SIZE)
 #define SPM_S_SIZE              (STACK_SIZE)
 #define SPM_GP_BASE             (HEAP_BASE)
-#define SPM_GP_SIZE             (HEAP_SIZE)
-#define SPM_SIZE                (SPM_I_SIZE + SPM_D_SIZE + SPM_GP_SIZE)
+// #define SPM_GP_SIZE             (HEAP_SIZE)
+// #define SPM_SIZE                (SPM_I_SIZE + SPM_D_SIZE + SPM_GP_SIZE)
 
 // Dense memory on the bus
 #define DENSE_MEM_BASE          (0xE0000000)
@@ -198,6 +123,36 @@
 #define UART_BASEADDR           (0x40600000)
 #define UART_SIZE               (0x00010000)
 #include "hardware/offsets/uart.h"
+
+
+
+//------------------------------------------------------------------------------
+// ALLOCATION STRATEGY DEFINITIONS
+//------------------------------------------------------------------------------
+/* strategies for allocation */
+#define DEFAULT_STRATEGY 				(0)
+#define ORACLE_STRATEGY 				(1)
+#define PROFILE_STRATEGY 	(2)
+#define PROFILE_ENHANCED 				(3)
+#define PROFILE_ILP 					(4)
+
+// strategy names for argument parsing
+#define DEFAULT_STRAT_STRING "default"
+#define ORACLE_STRAT_STRING "oracle"
+#define PROFILE_STRAT_STRING "profile"
+#define PROFILE_ENHANCED_STRING "profile-enhanced"
+#define PROFILE_ILP_STRING "profile-ilp"
+
+#define STRAT_COUNT 5
+
+
+//------------------------------------------------------------------------------
+/* HEAP MEMORY UTILITIES */
+//------------------------------------------------------------------------------
+
+#define dycton_align_16(x) 	(((x+8)/16)*16) //align heaps base on 16 Bytes
+
+
 
 #endif
 

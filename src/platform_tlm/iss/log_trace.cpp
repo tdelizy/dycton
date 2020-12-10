@@ -1,5 +1,30 @@
-#include "../log_trace.h"
+/*
 
+This file is part of the Dycton simulator.
+This software aims to provide an environment for Dynamic Heterogeneous Memory 
+Allocation for embedded devices study. It is build using SystemC / TLM.
+It uses the MIPS32 ISS from the SocLib project (www.soclib.fr). 
+It also use one SimSoc module (https://gforge.inria.fr/projects/simsoc/)
+(originals athors credited in respective files)
+
+Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+#include "../log_trace.h"
 
 
 
@@ -84,13 +109,13 @@ void PlatformLogSystem::log_flush(bool auto_flush)
     m_log_acc_map.clear();
 }
 
-void PlatformLogSystem::log_malloc(uint32_t addr, uint32_t size)
+void PlatformLogSystem::log_malloc(uint32_t addr, uint32_t size, uint32_t alloc_site, uint32_t fallback)
 {
     if (m_log_obj_map.find(addr) != m_log_obj_map.end()) {
         std::cerr << name() << ": overlap in heap allocation ! " << std::endl;
         // abort();
     }
-    m_log_obj_map[addr] = new LoggedObj((uint64_t)(PROC_FREQ * sc_core::sc_time_stamp().to_seconds()), size, m_current_heap_action);
+    m_log_obj_map[addr] = new LoggedObj((uint64_t)(PROC_FREQ * sc_core::sc_time_stamp().to_seconds()), size, alloc_site, m_current_heap_action, fallback);
     m_current_heap_action++;
 }
 
@@ -105,7 +130,7 @@ void PlatformLogSystem::log_free(uint32_t addr)
     } else {
         if((it_obj->second->r + it_obj->second->w )== 0)
             dbg_untouched_obj++;
-        // "address;size;malloc_date_cycles;lifespan_cycles;r_count;w_count"
+        // "address;size;malloc_date_cycles;lifespan_cycles;r_count;w_count;alloc_site;fallback"
         m_log_obj_file
                 << it_obj->first << ";"
                 << it_obj->second->size << ";"
@@ -114,8 +139,11 @@ void PlatformLogSystem::log_free(uint32_t addr)
                 << it_obj->second->r << ";"
                 << it_obj->second->w << ";"
                 << it_obj->second->alloc_order << ";"
-                << m_current_heap_action << std::endl;
-        m_current_heap_action++;
+                << m_current_heap_action << ";"
+                << std::hex << it_obj->second->alloc_site << ";"
+                << std::dec << it_obj->second->fallback
+                << std::endl;
+                m_current_heap_action++;
 
         m_r_access_count += it_obj->second->r;
         m_w_access_count += it_obj->second->w;
@@ -139,7 +167,10 @@ void PlatformLogSystem::log_unfreed_at_end()
                 << ent.second->r << ";"
                 << ent.second->w << ";"
                 << ent.second->alloc_order << ";"
-                << m_current_heap_action << std::endl;
+                << m_current_heap_action << ";"
+                << std::hex << ent.second->alloc_site << ";"
+                << std::dec << ent.second->fallback
+                << std::endl;
         m_current_heap_action++;
         delete ent.second;
     }
@@ -150,14 +181,6 @@ void PlatformLogSystem::log_flush_end()
 {
     log_flush(false);
     log_unfreed_at_end();
-    // std::cout<< "[invalid free calls : "<<m_invalid_free_calls<< "]" << std::endl;
-    // std::cout<< "[dbg_untouched_obj : "<<dbg_untouched_obj<<  "]" <<std::endl;
-    // std::cout<< "[m_heap_accesses_outside_obj : "<<m_heap_accesses_outside_obj<< "]" << std::endl;
-    // std::cout<< "[heap read access count : "<<m_r_access_count<< "]" << std::endl;
-    // std::cout<< "[heap write access count : "<<m_w_access_count<< "]" << std::endl;
-    // std::cout<< "[heap read / write access ratio : "<<(float)m_r_access_count/(float)m_w_access_count<< "]" << std::endl;
-
-
 }
 
 
@@ -186,7 +209,6 @@ unsigned int Oracle::get_next_prediction()
         std::cerr << "ERROR : unable to read from oracle file, aborting." << std::endl;
         abort();
     }
-    // std::cout << "oracle ("<< m_oracle_count<< ") = " << buf<< std::endl;
     m_oracle_count++;
     return buf;
 }

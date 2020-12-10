@@ -10,7 +10,11 @@
 // #define DIJKSTRA_LARGE
 #define DIJKSTRA_SMALL
 
+#define DIJKSTRA_IN_FILE_SIZE       dataset_in_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+
 #include "address_map.h"
+#include "hal.h"
+#include "libdycton.h"
 #include "dycton_dijkstra_app.h"
 
 
@@ -169,6 +173,8 @@ int main(int argc, char *argv[]) {
     /* open the adjacency matrix file */
     fp = fopen (argv[1], "r");
 #else
+    printf("\n\n\n================== Dijkstra application for DYCTON (from MIBENCH) ==================\n");
+    printf("(TDk @ CITI Lab)\n\n");
     if ((fp = fmemopen((int*)DIJKSTRA_IN_FILE_ADDR, DIJKSTRA_IN_FILE_SIZE, "r")) == NULL) {
         printf("File doesn't seem to exist\n");
         exit(1);
@@ -197,6 +203,7 @@ int main(int argc, char *argv[]) {
         j = j % NUM_NODES;
         _dijkstra(i, j);
     }
+    printf("\n======================================= THE END ==========================================\n");
     exit(0);
 
     return;

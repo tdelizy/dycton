@@ -18,9 +18,11 @@ EXEC = a.out
 
 $(EXEC): $(OBJS) ../../common/ldscript
 	$(TARGET_LD) -q $(CROSS_LDFLAGS) $(OBJS) -o $@ -T../../common/ldscript -L../jpeg-6a/ -ljpeg  -L../../common -lc -lm $(LIBGCC)
+	$(TARGET_OBJDUMP) a.out -fpwd > a.asm
+	$(TARGET_OBJDUMP) a.out -t > symbol_table.txt
 	cp a.out ../../a.out
 
-main.o: ../main.c ../../../address_map.h ../../common/hal.h ../jpeg_app.h
+main.o: ../main.c ../../../address_map.h ../../common/hal.h ../dycton_jpeg_app.h
 	$(TARGET_CC) $(TARGET_CFLAGS) -c $< -o $@
 
 rdppm.o: ../rdppm.c ../jpeg-6a/jinclude.h ../jpeg-6a/jconfig.h ../jpeg-6a/jpeglib.h ../jpeg-6a/jmorecfg.h ../jpeg-6a/jerror.h ../jpeg-6a/cderror.h

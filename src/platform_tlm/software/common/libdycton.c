@@ -26,13 +26,42 @@
  * Maintainers: nipo
  */
 
+/* Interation and usage in the dycton project : 
+ *
+ * most of the initial code was replaced, now contains the implementation of the
+ * dispatcher taking placement decisions at runtime.
+ * It also contains variables declaration of the malloc from newlib (DLMalloc)
+ * adapted for multi-heap.
+ * this decision is taken inside the dispatch_and_allocate function
+ *
+ * Tristan Delizy, 2019
+ */
+
+
+
+
 #include <string.h>
 
 #include "libdycton.h"
+#if defined(jpeg)
+#include "jpeg_alloc_site_profile.h"
+#elif defined(json_parser)
+#include "json_parser_alloc_site_profile.h"
+#elif defined(dijkstra)
+#include "dijkstra_alloc_site_profile.h"
+#elif defined(jpg2000)
+#include "jpg2000_alloc_site_profile.h"
+#elif defined(h263)
+#include "h263_alloc_site_profile.h"
+#elif defined(ecdsa)
+#include "ecdsa_alloc_site_profile.h"
+#else
+#warning "no profile header : profile strategy unusable, see libdycton.c"
+#define GENERATED_SWITCH_PROFILE(a, b) do{exit(454545);}while(0)
+#define ASSERT_PROFILE_CONSISTENCY(a) do{exit(454545);}while(0)
+#endif
 #include "hal.h"
 #include "../../address_map.h"
-
-
 
 #define ALLOC_REQ_START(x) do {write_mem(HELPER_BASE+ALLOC_SIZE,x);} while(0)
 #define ALLOC_REQ_END(x) do {write_mem(HELPER_BASE+ALLOC_ADDR,x);} while(0)
@@ -43,6 +72,19 @@
 #define ALLOC_GRANULARITY ((uint32_t)sizeof(uint32_t)) // size in octets
 
 #define ALLOC_INTERNAL_FAIL(x) do {write_mem(HELPER_BASE+ALLOC_FAIL_OFFSET,x);} while(0)
+
+#define ALLOC_RETURN_ADDR(x) do {write_mem(HELPER_BASE+RETURN_ADDR,x);} while(0) // must be used between alloc start and alloc end.
+
+#define PROFILE_LIST_LENGTH read_mem(HELPER_BASE+PROFILE_LEN)
+
+#define HEAP_X_BASE(x) read_mem(HELPER_BASE + HEAP_BASE_INFO + (x*4))
+
+#define HEAP_X_SIZE(x) read_mem(HELPER_BASE + HEAP_SIZE_INFO + (x*4))
+
+#define HEAP_COUNT read_mem(HELPER_BASE + HEAP_COUNT_INFO)
+
+#define ARCH_INDEX read_mem(HELPER_BASE + HEAP_ARCHI)
+
 
 
 //----------Newlib memory management types and defines ----------
@@ -89,8 +131,24 @@
     IAV(x,120), IAV(x,121), IAV(x,122), IAV(x,123), IAV(x,124), IAV(x,125), IAV(x,126), IAV(x,127)}
 #endif
 
+#define SIZE_SZ                (sizeof(INTERNAL_SIZE_T))
+#ifndef MALLOC_ALIGNMENT
+#define MALLOC_ALIGN           8
+#define MALLOC_ALIGNMENT       (SIZE_SZ < 4 ? 8 : (SIZE_SZ + SIZE_SZ))
+#else
+#define MALLOC_ALIGN           MALLOC_ALIGNMENT
+#endif
+#define MALLOC_ALIGN_MASK      (MALLOC_ALIGNMENT - 1)
+#define MINSIZE                (sizeof(struct malloc_chunk))
 
-//---------- multi-hepa variables declaration ----------
+/* pad request bytes into a usable size */
+
+#define request2size(req) \
+ (((unsigned long)((req) + (SIZE_SZ + MALLOC_ALIGN_MASK)) < \
+  (unsigned long)(MINSIZE + MALLOC_ALIGN_MASK)) ? ((MINSIZE + MALLOC_ALIGN_MASK) & ~(MALLOC_ALIGN_MASK)) : \
+   (((req) + (SIZE_SZ + MALLOC_ALIGN_MASK)) & ~(MALLOC_ALIGN_MASK)))
+
+
 
 #define HEAP_CTX_STATIC_INIT(x) {                                                           \
     DEFAULT_BIN_ARRAY_INIT(multi_heap_ctx[x]),                                              \
@@ -100,64 +158,71 @@
     DEAULT_MAX_SBRKED_MEM_INIT,                                                             \
     DEFAULT_MAX_TOTAL_MEM_INIT,                                                             \
     DEFAULT_CURRENT_MALLINFO_INIT,                                                          \
-    HEAP_X_BASE(x),                                                                         \
-    HEAP_X_SIZE(x),                                                                         \
+    0,                                                                         \
+    0,                                                                         \
     0,                                                                                      \
-    HEAP_X_SIZE(x),                                                                         \
-    0,                                                                                    \
+    0,                                                                         \
+    0,                                                                                      \
     x                                                                                       \
 }
-
-// Heap_ctx mono_heap_fallback = {
-//     DEFAULT_BIN_ARRAY_INIT(mono_heap_fallback),
-//     DEFAULT_TRIM_THRESHOLD,
-//     DEFAULT_TOP_PAD,
-//     DEFAULT_SBRK_BASE_INIT,
-//     DEAULT_MAX_SBRKED_MEM_INIT,
-//     DEFAULT_MAX_TOTAL_MEM_INIT,
-//     DEFAULT_CURRENT_MALLINFO_INIT,
-//     HEAP_BASE,
-//     HEAP_SIZE,
-//     0,
-//     0
-// };
-
-Heap_ctx multi_heap_ctx[HEAP_COUNT] = {
-    HEAP_CTX_STATIC_INIT(0)
-#if (HEAP_COUNT > 1)
-    , HEAP_CTX_STATIC_INIT(1)
-#if (HEAP_COUNT > 2)
-    , HEAP_CTX_STATIC_INIT(2)
-#if (HEAP_COUNT > 3)
-    , HEAP_CTX_STATIC_INIT(3)
-#if (HEAP_COUNT > 4)
-    , HEAP_CTX_STATIC_INIT(4)
-#if (HEAP_COUNT > 5 && HEAP_COUNT < 7)
-    , HEAP_CTX_STATIC_INIT(5)
-#else
-#error "TOO MANY HEAPS FOR STATIC INIT, SEE LIBDYCTON.H"
-#endif
-#endif
-#endif
-#endif
-#endif
-};
+ 
+ 
 
 
+//---------- multi-heap and dispatcher variables declaration ----------
+
+Heap_ctx multi_heap_ctx[2] = {HEAP_CTX_STATIC_INIT(0), HEAP_CTX_STATIC_INIT(1)};
 Heap_ctx * alloc_context = &(multi_heap_ctx[0]);
 
-//---------- classical memory managment primitives handling multi heap ----------
+uint32_t fast_bytes_occupied = 0;
+uint32_t last_fast_bytes_occupied = 0;
+uint32_t max_fast_bytes_occupied = 0;
+uint32_t low_thr = 33; // percentage as an int
+uint32_t high_thr = 66; // percentage as an int
+uint32_t discarded_obj_count = 0;
+uint32_t p_occ = 0;
 
-void *malloc(size_t sz)
+uint32_t delta_5percent = 0;
+
+
+// stub to call at start
+// in real life these init would be static dependent on HW architecture
+// but in simulation, to facilitate parameters exploration,
+// those information are not known at compile time
+void init_multi_heap(void)
 {
-    global_debug_req_sz = sz;
+#ifdef DYCTON_DBG
+    print("init_multi_heap\n");
+#endif
+    multi_heap_ctx[0].heap_base = HEAP_X_BASE(0);
+    multi_heap_ctx[0].heap_max_size = HEAP_X_SIZE(0);
+    multi_heap_ctx[0].bfbs = HEAP_X_SIZE(0);
+
+    if (HEAP_COUNT >= 2){
+        multi_heap_ctx[1].heap_base = HEAP_X_BASE(1);
+        multi_heap_ctx[1].heap_max_size = HEAP_X_SIZE(1);
+        multi_heap_ctx[1].bfbs = HEAP_X_SIZE(1);
+    }
+    max_fast_bytes_occupied = HEAP_X_SIZE(0);
+    delta_5percent = HEAP_X_SIZE(0)/20;
+}
+
+// implementations of the different placement strategies 
+void * dispatch_and_allocate(size_t sz, uint32_t caller_address)
+{
     void *returnPointer = NULL;
     uint32_t oracle_rsp = 0xFFFF;
-#ifdef DYCTON_DBG
-    print("dycton malloc("); print_dec((int)sz); print(")\n");
-#endif
-    ALLOC_REQ_START(sz);
+
+
+    // workaround : init here
+    if(!(multi_heap_ctx[0].heap_base)){
+        init_multi_heap();
+    }
+
+
+    // dispatch following current strategy
     switch (*(uint32_t*)(HELPER_BASE + ALLOCATOR_STRATEGY)) {
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     case DEFAULT_STRATEGY:
         // greedy : try to allocate in first / fastest heap (/!\ speed ordering assumption)
         alloc_context = &(multi_heap_ctx[0]);
@@ -165,88 +230,198 @@ void *malloc(size_t sz)
 
         // fallback to other heap in case of failure (implem for 2 heaps)
         if (!returnPointer) {
-        	ALLOC_INTERNAL_FAIL(0);
+            ALLOC_INTERNAL_FAIL(0);
             alloc_context = &(multi_heap_ctx[1]);
             returnPointer = newlib_malloc_r(_impure_ptr, sz);
         }
         break;
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     case ORACLE_STRATEGY:
         oracle_rsp = *(uint32_t*)(HELPER_BASE + ALLOCATOR_ORACLE_REQ);
-        print_dec(oracle_rsp); print("\n");
         if (oracle_rsp >= HEAP_COUNT) {
-#ifdef DYCTON_DBG
-        	print("heap count = ");print_dec(HEAP_COUNT); print("\n");
+            #ifdef DYCTON_DBG
+            print("heap count = ");print_dec(HEAP_COUNT); print("\n");
             print("oracle strategy inconsistent with current architecture.\n");
             print("aborting...\n");
-#endif
+            #endif
             exit(30);
         }
         alloc_context = &(multi_heap_ctx[oracle_rsp]);
         returnPointer = newlib_malloc_r(_impure_ptr, sz);
         // fallback to other heap in case of failure (implem for 2 heaps)
         if (!returnPointer) {
-#ifdef DYCTON_DBG
+            #ifdef DYCTON_DBG
             print("not enougth space to follow oracle strategy, fallback on slow memory.");
-#endif
+            #endif
             ALLOC_INTERNAL_FAIL(0);
-            alloc_context = &(multi_heap_ctx[1]);
+            alloc_context = &(multi_heap_ctx[(1-oracle_rsp)]);
             returnPointer = newlib_malloc_r(_impure_ptr, sz);
+            if (!returnPointer){
+                exit(31);
+            }
         }
         break;
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    case PROFILE_STRATEGY:
+        ASSERT_PROFILE_CONSISTENCY(caller_address); // deactivated by default, see {app}_profile.h
+        GENERATED_SWITCH_PROFILE(caller_address,PROFILE_LIST_LENGTH);
+        break; 
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    case PROFILE_ENHANCED:
+        ASSERT_PROFILE_CONSISTENCY(caller_address); // deactivated by default, see {app}_profile.h
+        switch (ARCH_INDEX) {
+            case 5:
+                GEN_SW_PROF_ENHANCED_A5(caller_address,PROFILE_LIST_LENGTH);
+                break; 
+            case 4:
+                GEN_SW_PROF_ENHANCED_A4(caller_address,PROFILE_LIST_LENGTH);
+                break; 
+            case 3:
+                GEN_SW_PROF_ENHANCED_A3(caller_address,PROFILE_LIST_LENGTH);
+                break; 
+            case 2:
+                GEN_SW_PROF_ENHANCED_A2(caller_address,PROFILE_LIST_LENGTH);
+                break; 
+            case 1:
+                GEN_SW_PROF_ENHANCED_A1(caller_address,PROFILE_LIST_LENGTH);
+                break; 
+            default:
+#ifdef DYCTON_DBG
+                print("PROFILE_STRATEGY_ENHANCED : architecture not supported.\n");
+                print("aborting...\n");
+#endif
+                exit(34);
+            }
+        break; 
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    case PROFILE_ILP:
+        ASSERT_PROFILE_CONSISTENCY(caller_address); // deactivated by default, see {app}_profile.h
+        switch (ARCH_INDEX) {
+            case 5:
+                GEN_SW_PROF_ILP_A5(caller_address);
+                break; 
+            case 4:
+                GEN_SW_PROF_ILP_A4(caller_address);
+                break; 
+            case 3:
+                GEN_SW_PROF_ILP_A3(caller_address);
+                break; 
+            case 2:
+                GEN_SW_PROF_ILP_A2(caller_address);
+                break; 
+            case 1:
+                GEN_SW_PROF_ILP_A1(caller_address);
+                break; 
+            default:
+#ifdef DYCTON_DBG
+                print("PROFILE_STRATEGY_ILP : architecture not supported.\n");
+                print("aborting...\n");
+#endif
+                exit(34);
+            }
+        break; 
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     default:
 #ifdef DYCTON_DBG
         print("unknown strategy number.\n");
         print("aborting...\n");
 #endif
-        exit(31);
+        exit(33);
     }
+
+    return returnPointer;
+}
+
+
+//---------- classical memory managment primitives handling multi heap ----------
+// the lalloc interface dispatch requests between multiple heaps
+void *malloc(size_t sz)
+{
+    void *returnPointer = NULL;
+    uint32_t caller_address = (uint32_t)__builtin_return_address(0);
+
+#ifdef DYCTON_DBG
+    print("dycton malloc("); print_dec((int)sz); print(") padded_sz = "); print_dec((int)request2size(sz)); print("\n");
+#endif
+    ALLOC_REQ_START(sz);
+    ALLOC_RETURN_ADDR(caller_address);
+
+    returnPointer = dispatch_and_allocate(sz, caller_address);
 
     ALLOC_REQ_END(returnPointer);
     return returnPointer;
 }
 
 
-// bad realloc for now
+
+// unneficient realloc implementation
 // copy back the full size, should not break anything (as the added memory should not be initialized ...)
-// could be desastrous in a real life system
+// CAUTION: This would be a major security issue in a real system ! 
 void *realloc(void* ptr, size_t sz)
 {
+    void *returnPointer = NULL;
+    uint32_t caller_address = (uint32_t)__builtin_return_address(0);
+
 #ifdef DYCTON_DBG
     print("dycton realloc("); print_dec((int)ptr); print(", "); print_dec((int)sz); print(")\n");
 #endif
+    ALLOC_REQ_START(sz);
+    ALLOC_RETURN_ADDR(caller_address);
+
+    returnPointer = dispatch_and_allocate(sz, caller_address);
+    
     if (!ptr) {
-        return malloc(sz);
+        ALLOC_REQ_END(returnPointer);
+        return returnPointer;
+    } else {
+        memcpy(returnPointer, ptr, sz);
+        ALLOC_REQ_END(returnPointer);
+        free(ptr); // do not overlap in time different operation logs of memory allocator
+        return returnPointer;
     }
-    void * new_ptr = malloc(sz);
-    memcpy(new_ptr, ptr, sz);
-    free(ptr);
-    return new_ptr;
 }
+
+
 
 
 void* calloc(size_t num, size_t size)
 {
+    void *returnPointer = NULL;
+    uint32_t caller_address = (uint32_t)__builtin_return_address(0);
+
 #ifdef DYCTON_DBG
     print("dycton calloc("); print_dec((int)num); print(", "); print_dec((int)size); print(")\n");
 #endif
-    volatile const uint32_t s = size * num;
-    void * ptr = malloc(s);
-    memset(ptr, 0, s);
-    return ptr;
+
+    volatile const uint32_t sz = size * num;
+
+    ALLOC_REQ_START(sz);
+    ALLOC_RETURN_ADDR(caller_address);
+
+    returnPointer = dispatch_and_allocate(sz, caller_address);
+
+    memset(returnPointer, 0, sz);
+    ALLOC_REQ_END(returnPointer);
+    return returnPointer;
 
 }
 
 void free(void* ptr)
 {
+    uint32_t free_sz = 0;
 #ifdef DYCTON_DBG
-    print("dycton free("); print_dec((int)ptr); print(")\n");
+    print("dycton free("); print_dec((int)ptr); print(")");
 #endif
     FREE_REQ_START(ptr);
 
     for (int i = 0; i < (HEAP_COUNT); i++)
     {   if ((int)ptr >= multi_heap_ctx[i].heap_base && (int)ptr <= multi_heap_ctx[i].heap_end ) {
             alloc_context = &(multi_heap_ctx[i]);
-            newlib_free_r(_impure_ptr, (void*)ptr);
+            free_sz = newlib_free_r(_impure_ptr, (void*)ptr);
+            if(i == 0){
+                // print(" sz = "); print_dec((int)free_sz); print("\n");
+                fast_bytes_occupied -= free_sz;
+            }
             FREE_REQ_END(0);
             return;
         }

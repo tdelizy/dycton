@@ -32,7 +32,15 @@
 
 #include "sim.h"
 #include "address_map.h"
-#include "h263_app.h"
+#include "hal.h"
+
+extern uint32_t dataset_in_size[];
+extern uint32_t dataset_out_size[];
+extern uint32_t dataset_stream_out_size[];
+
+#define DATASET_SZ_IN               dataset_in_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define DATASET_SZ_OUT              dataset_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define DATASET_SZ_STREAM_OUT       dataset_stream_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
 
 /**********************************************************************
  *
@@ -60,11 +68,8 @@ unsigned char *ReadImage(char *filename, int frame_no, int headerlength)
     fprintf(stderr,"Couldn't allocate memory to image\n");
     exit(-1);
   }
-#ifdef DYCTON_RUN
-  if ((im_file = fmemopen((int*)H263_IN_ADDR, DATASET_SZ_IN, "rb")) == NULL) {
-#else
-  if ((im_file = fopen(filename,"rb")) == NULL) {
-#endif
+
+  if ((im_file = fmemopen((int*)DENSE_MEM_BASE, DATASET_SZ_IN, "rb")) == NULL) {
     fprintf(stderr,"Unable to open image_file: %s\n",filename);
     exit(-1);
   }
@@ -139,11 +144,7 @@ void WriteImage(PictImage *image, char *filename)
   FILE *f_out;
 
   /* Opening file */
-#ifdef DYCTON_RUN
-  if ((f_out = fmemopen((int*)H263_OUT_ADDR, DATASET_RAW_SZ, "ab")) == NULL) {
-#else
-  if ((f_out = fopen(filename,"ab")) == NULL) {
-#endif
+  if ((f_out = fmemopen((int*)(DENSE_MEM_BASE + (DENSE_MEM_SIZE/3)), DATASET_SZ_OUT, "ab")) == NULL) {
     fprintf(stderr,"%s%s\n","Error in opening file: ",filename);
     exit(-1);
   }

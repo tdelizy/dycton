@@ -41,6 +41,7 @@ logs/
 *.run.xml
 *.snm
 *.synctex.gz
+*blx.bib
 *.pygstyle
 *.d
 deps.mk
@@ -55,14 +56,26 @@ arch_stamp
 *.lp
 *.pyc
 *.placement
+*symbol_table.txt
+*a.asm
+*.profile
+*.ods#
 
 # specific generated files
 src/platform_tlm/software/common/ldscript
 src/platform_tlm/software/*/*out*
+src/scripts/*.h
+src/platform_tlm/software/h263/datasets/output.*
 
 
 
 #unignore !/rep_to_unignore/
 !src/platform_tlm/software/common/libc.a
 !src/platform_tlm/software/common/libm.a
+!src/platform_tlm/software/jpg2000/libjasper.a
 !src/platform_tlm/software/jpeg/input_*
+!src/scripts/reference_executions/dijkstra/*
+!src/scripts/reference_executions/h263/*
+!src/scripts/reference_executions/jpeg/*
+!src/scripts/reference_executions/jpg2000/*
+!src/scripts/reference_executions/json_parser/*

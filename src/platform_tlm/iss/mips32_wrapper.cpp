@@ -1,9 +1,20 @@
-/********************************************************************
- * project DYCTON 2017 - CITI Lab                                   *
- * Author: Tristan Delizy                                           *
- * Based on code from Matthieu Moy - Verimag 2009, 2012             *
- *******************************************************************/
 
+/********************************************************************
+ * Copyright (C) 2009, 2012 by Verimag                              *
+ * Initial author: Matthieu Moy                                     *
+ *                                                                  *
+ * Inclusion and adaptation : Tristan Delizy, 2019                  *
+ ********************************************************************/
+
+/*
+
+This file contains the wrapper working around the MIPS32 ISS from SocLib project.
+
+In this wrapper we implement write decoupling (not waiting ACK for writing in memory)
+the class have 2 sc_threads : one running the ISS, the other one handling memory 
+request to the simulated memories.
+
+*/
 
 #include "mips32_wrapper.h"
 #include <iomanip>
@@ -28,7 +39,7 @@ static bool sim_i_resp_rdy = false;
 const sc_core::sc_time PLATFORM_CYCLE = sc_core::sc_time (2500, sc_core::SC_PS);
 const uint64_t PROC_FREQ = (uint64_t)(1.0/(PLATFORM_CYCLE.to_seconds()));
 
-
+// wrapper constructor
 MIPS32Wrapper::MIPS32Wrapper( sc_core::sc_module_name name,
                               uint32_t ident,
                               uint32_t code_start,
@@ -89,11 +100,21 @@ MIPS32Wrapper::MIPS32Wrapper( sc_core::sc_module_name name,
 
 }
 
-uint64_t MIPS32Wrapper::get_cycles(void){
+// timing retrieving
+uint64_t MIPS32Wrapper::get_cycles(void)
+{
     return m_cycle_count;
 }
 
-void MIPS32Wrapper::process_irq(void) {
+// debug utility
+void MIPS32Wrapper::print_iss_regs(void)
+{
+    m_iss.dump();
+}
+
+// stubbed IRQ
+void MIPS32Wrapper::process_irq(void) 
+{
         std::cerr << "[" << name() << "] at [" << sc_time_stamp().to_seconds()
         << "] process_irq sc_method called AND SHOULD NOT... dump & abort" << std::endl;
         m_iss.dump();
@@ -105,7 +126,8 @@ void MIPS32Wrapper::process_irq(void) {
     }
 }
 
-
+// TLM transaction payload construction for instruction fetch in memory
+// choosing targetted interface of core in fuction of address (instruction_spm / data_spm / data_bus)
 void MIPS32Wrapper::request_fetch(uint32_t &addr)
 {
     tlm::tlm_generic_payload* pl;
@@ -155,7 +177,8 @@ void MIPS32Wrapper::request_fetch(uint32_t &addr)
     }
 }
 
-
+// TLM transaction payload construction for a data read in memory
+// choosing targetted interface of core in fuction of address (instruction_spm / data_spm / data_bus)
 void MIPS32Wrapper::request_read_data(uint32_t &addr, soclib::common::Iss2::be_t be)
 {
     tlm::tlm_generic_payload* pl;
@@ -206,7 +229,8 @@ void MIPS32Wrapper::request_read_data(uint32_t &addr, soclib::common::Iss2::be_t
     }
 }
 
-
+// TLM transaction payload construction for a data write in memory
+// choosing targetted interface of core in fuction of address (instruction_spm / data_spm / data_bus)
 void MIPS32Wrapper::request_write_data(uint32_t &addr, uint32_t &data, soclib::common::Iss2::be_t be)
 {
     tlm::tlm_generic_payload* pl;
@@ -220,7 +244,7 @@ void MIPS32Wrapper::request_write_data(uint32_t &addr, uint32_t &data, soclib::c
     if(addr == HELPER_BASE + TIMED_EVENT)
         m_iss.dump();
 
-    pl = new tlm::tlm_generic_payload(); // /!\ we should not allocate and deallocate payload each time
+    pl = new tlm::tlm_generic_payload(); // /!\ we could avoid allocating and freeing payload each time
     data_ptr = new int(0);
     byte_enable_ptr = new unsigned char(0);
 
@@ -263,7 +287,8 @@ void MIPS32Wrapper::request_write_data(uint32_t &addr, uint32_t &data, soclib::c
 }
 
 
-
+// TLM layer response process
+// ensure payload is returned without error and retrieve buffer content if needed
 // we assume there that the buffer is of size pl.get_data_length
 void MIPS32Wrapper::process_resp(tlm::tlm_generic_payload* pl, char* buffer)
 {
@@ -280,7 +305,7 @@ void MIPS32Wrapper::process_resp(tlm::tlm_generic_payload* pl, char* buffer)
 }
 
 
-// TLM-2 backward non-blocking transport method
+// TLM-2 backward non-blocking transport method for instruction interface
 tlm::tlm_sync_enum MIPS32Wrapper::nb_transport_bw_i(tlm::tlm_generic_payload& pl, tlm::tlm_phase& phase, sc_time& delay)
 {
     uint32_t addr = pl.get_address();
@@ -289,7 +314,7 @@ tlm::tlm_sync_enum MIPS32Wrapper::nb_transport_bw_i(tlm::tlm_generic_payload& pl
     return tlm::TLM_COMPLETED;
 }
 
-
+// TLM-2 backward non-blocking transport method for data interface
 tlm::tlm_sync_enum MIPS32Wrapper::nb_transport_bw_d(tlm::tlm_generic_payload& pl, tlm::tlm_phase& phase, sc_time& delay)
 {
     uint32_t addr = pl.get_address();
@@ -299,6 +324,7 @@ tlm::tlm_sync_enum MIPS32Wrapper::nb_transport_bw_d(tlm::tlm_generic_payload& pl
 }
 
 
+// TLM-2 backward non-blocking transport method for bus interface
 tlm::tlm_sync_enum MIPS32Wrapper::nb_transport_bw_b(tlm::tlm_generic_payload& pl, tlm::tlm_phase& phase, sc_time& delay)
 {
     uint32_t addr = pl.get_address();

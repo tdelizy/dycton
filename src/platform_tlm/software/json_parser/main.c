@@ -22,11 +22,11 @@
 #include "address_map.h"
 #include "hal.h"
 #include "parson.h"
+#include "dycton_json_parser_app.h"
+#include "libdycton.h"
 
-// #define RECIEVED_SIZE (1814) // walking_dead_shorter.json
-#define RECIEVED_SIZE (13041) // walking_dead_short.json
-// #define RECIEVED_SIZE (91343) // walking_dead.json
-// #define RECIEVED_SIZE (62082) // games_of_thrones.json
+
+#define RECIEVED_SIZE dataset_received_size[read_mem(HELPER_BASE + DATASET_INDEX)]
 
 
 
@@ -51,7 +51,7 @@ int main() {
         addr++;
     }
 
-    printf("%d charaters recieved\n", RECIEVED_SIZE);
+    printf("%ld charaters recieved\n", RECIEVED_SIZE);
     printf("end of input stream, parsing resulting string.\n");
 
 
@@ -61,13 +61,17 @@ int main() {
     JSON_Value * json_value_ptr = NULL;
     JSON_Object * json_object_ptr = NULL;
     json_value_tree_root = json_parse_string(string_to_parse);
-    printf("string parsed !\n");
 
     // free the parsed string
     free(string_to_parse);
 
     // getting an array of episodes from the json database
     json_object_tree_root = json_value_get_object(json_value_tree_root);
+    if(!json_object_tree_root){
+        err = 4;
+        goto err_exit;
+    }
+    printf("string parsed !\n");
     json_value_ptr = json_object_get_value(json_object_tree_root, "_embedded");
     json_object_ptr = json_value_get_object(json_value_ptr);
     JSON_Array  * array = json_object_get_array(json_object_ptr, "episodes");
@@ -116,7 +120,7 @@ int main() {
     //   }
     // }
     JSON_Object * ep = NULL;
-    if (array != NULL && json_array_get_count(array) > 1) {
+    if (array != NULL && json_array_get_count(array) > 0) {
         for (int i = 0; i < json_array_get_count(array); i++) {
             ep = json_array_get_object (array, i);
             printf("ep name : %s\n",json_object_get_string(ep, "name"));
@@ -130,13 +134,14 @@ int main() {
             json_object_dotremove(ep, "_links");
         }
     }else{
-        printf("json_array_get_count(array)=%d", json_array_get_count(array));
+        printf("json_array_get_count(array)=%d\n", json_array_get_count(array));
     }
 
 
     // serialize resulting json object array to a buffer
     printf("serialize to string...\n");
     char *serialized_string = json_serialize_to_string_pretty(json_value_tree_root);
+    printf("result address = %d\n", (int)serialized_string);
     if (serialized_string == NULL) {
         err = 5;
         goto err_exit;

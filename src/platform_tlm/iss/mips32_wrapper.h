@@ -1,8 +1,10 @@
+
 /********************************************************************
- * project DYCTON 2017 - CITI Lab                                   *
- * Author: Tristan Delizy                                           *
- * Based on code from Matthieu Moy - Verimag 2009, 2012             *
- *******************************************************************/
+ * Copyright (C) 2009, 2012 by Verimag                              *
+ * Initial author: Matthieu Moy                                     *
+ *                                                                  *
+ * Inclusion and adaptation : Tristan Delizy, 2019                  *
+ ********************************************************************/
 
 
 #ifndef MIPS32_WRAPPER_H
@@ -38,6 +40,7 @@ public:
                   uint32_t spm_size);
 
   uint64_t get_cycles(void);
+  void print_iss_regs(void);
 
 private:
   int irq_duration;

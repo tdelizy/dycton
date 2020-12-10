@@ -44,14 +44,6 @@
 #define EXIT_SUCCESS  0
 #endif
 
-#define _HEAP_X_BASE(x) HEAP_##x##_BASE
-
-#define _HEAP_X_SIZE(x) HEAP_##x##_SIZE
-
-#define HEAP_X_BASE(x) _HEAP_X_BASE(x)
-
-#define HEAP_X_SIZE(x) _HEAP_X_SIZE(x)
-
 #ifndef INTERNAL_SIZE_T
 #define INTERNAL_SIZE_T size_t
 #endif
@@ -62,8 +54,6 @@
 #define MALLOC_EARLY_FAIL_IMPLEM // for handling multi-heap properly
 
 #define NAV             128   /* number of bins */
-
-int global_debug_req_sz;
 
 //---------- types declaration from newlib allocator ----------
 struct mallinfo {
@@ -118,10 +108,10 @@ int * __errno ();
 
 // typedef unsigned int size_t;
 // typedef int ssize_t;
-
+void init_multi_heap(void);
 void * malloc(size_t sz);
 void * realloc(void* ptr, size_t sz);
-void* calloc(size_t num, size_t size);
+void * calloc(size_t num, size_t size);
 void free(void*);
 
 void exit(int);

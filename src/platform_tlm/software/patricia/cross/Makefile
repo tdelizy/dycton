@@ -18,6 +18,8 @@ EXEC = a.out
 
 $(EXEC): $(OBJS) ../../common/ldscript
 	$(TARGET_LD) -q $(CROSS_LDFLAGS) $(OBJS) -nostdlib -L../../common -lc -o $@ -T../../common/ldscript -lm $(LIBGCC)
+	$(TARGET_OBJDUMP) a.out -fpwd > a.asm
+	$(TARGET_OBJDUMP) a.out -t > symbol_table.txt
 	cp a.out ../../a.out
 
 main.o: ../main.c ../../../address_map.h ../dycton_patricia_app.h

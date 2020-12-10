@@ -1,0 +1,1325 @@
+{
+    "id": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "url": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "name": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "type": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "language": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "genres": [{
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        }
+    ],
+    "status": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "runtime": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "premiered": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "officialSite": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "schedule": {
+        "time": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "days": [{
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        }]
+    },
+    "rating": {
+        "average": 12
+    },
+    "weight": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "network": {
+        "id": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "name": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "country": {
+            "name": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "code": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "timezone": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            }
+        }
+    },
+    "webChannel": {
+        "id": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "name": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "country": {
+            "name": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "code": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "timezone": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            }
+        }
+    },
+    "externals": {
+        "tvrage": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "thetvdb": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "imdb": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        }
+    },
+    "image": {
+        "medium": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        },
+        "original": {
+            "widget": {
+                "debug": "on",
+                "window": {
+                    "title": "Sample Konfabulator Widget",
+                    "name": "main_window",
+                    "width": 500,
+                    "height": 500
+                },
+                "image": {
+                    "src": "Images/Sun.png",
+                    "name": "sun1",
+                    "hOffset": 250,
+                    "vOffset": 250,
+                    "alignment": "center"
+                },
+                "text": {
+                    "data": "Click Here",
+                    "size": 36,
+                    "style": "bold",
+                    "name": "text1",
+                    "hOffset": 250,
+                    "vOffset": 100,
+                    "alignment": "center",
+                    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                }
+            }
+        }
+    },
+    "summary": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "updated": {
+        "widget": {
+            "debug": "on",
+            "window": {
+                "title": "Sample Konfabulator Widget",
+                "name": "main_window",
+                "width": 500,
+                "height": 500
+            },
+            "image": {
+                "src": "Images/Sun.png",
+                "name": "sun1",
+                "hOffset": 250,
+                "vOffset": 250,
+                "alignment": "center"
+            },
+            "text": {
+                "data": "Click Here",
+                "size": 36,
+                "style": "bold",
+                "name": "text1",
+                "hOffset": 250,
+                "vOffset": 100,
+                "alignment": "center",
+                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+            }
+        }
+    },
+    "_links": {
+        "self": {
+            "href": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            }
+        },
+        "previousepisode": {
+            "href": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            }
+        }
+    },
+    "_embedded": {
+        "episodes": [{
+            "id": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "url": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "name": "less strings",
+            "season": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "number": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "airdate": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "airtime": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "airstamp": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "runtime": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "image": {
+                "medium": {
+                    "widget": {
+                        "debug": "on",
+                        "window": {
+                            "title": "Sample Konfabulator Widget",
+                            "name": "main_window",
+                            "width": 500,
+                            "height": 500
+                        },
+                        "image": {
+                            "src": "Images/Sun.png",
+                            "name": "sun1",
+                            "hOffset": 250,
+                            "vOffset": 250,
+                            "alignment": "center"
+                        },
+                        "text": {
+                            "data": "Click Here",
+                            "size": 36,
+                            "style": "bold",
+                            "name": "text1",
+                            "hOffset": 250,
+                            "vOffset": 100,
+                            "alignment": "center",
+                            "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                        }
+                    }
+                },
+                "original": {
+                    "widget": {
+                        "debug": "on",
+                        "window": {
+                            "title": "Sample Konfabulator Widget",
+                            "name": "main_window",
+                            "width": 500,
+                            "height": 500
+                        },
+                        "image": {
+                            "src": "Images/Sun.png",
+                            "name": "sun1",
+                            "hOffset": 250,
+                            "vOffset": 250,
+                            "alignment": "center"
+                        },
+                        "text": {
+                            "data": "Click Here",
+                            "size": 36,
+                            "style": "bold",
+                            "name": "text1",
+                            "hOffset": 250,
+                            "vOffset": 100,
+                            "alignment": "center",
+                            "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                        }
+                    }
+                }
+            },
+            "summary": {
+                "widget": {
+                    "debug": "on",
+                    "window": {
+                        "title": "Sample Konfabulator Widget",
+                        "name": "main_window",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "image": {
+                        "src": "Images/Sun.png",
+                        "name": "sun1",
+                        "hOffset": 250,
+                        "vOffset": 250,
+                        "alignment": "center"
+                    },
+                    "text": {
+                        "data": "Click Here",
+                        "size": 36,
+                        "style": "bold",
+                        "name": "text1",
+                        "hOffset": 250,
+                        "vOffset": 100,
+                        "alignment": "center",
+                        "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                    }
+                }
+            },
+            "_links": {
+                "self": {
+                    "href": {
+                        "widget": {
+                            "debug": "on",
+                            "window": {
+                                "title": "Sample Konfabulator Widget",
+                                "name": "main_window",
+                                "width": 500,
+                                "height": 500
+                            },
+                            "image": {
+                                "src": "Images/Sun.png",
+                                "name": "sun1",
+                                "hOffset": 250,
+                                "vOffset": 250,
+                                "alignment": "center"
+                            },
+                            "text": {
+                                "data": "Click Here",
+                                "size": 36,
+                                "style": "bold",
+                                "name": "text1",
+                                "hOffset": 250,
+                                "vOffset": 100,
+                                "alignment": "center",
+                                "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+                            }
+                        }
+                    }
+                }
+            }
+        }]
+    }
+}

@@ -91,7 +91,21 @@
 #include "jasper/jas_malloc.h"
 #include "jasper/jas_math.h"
 
-#include "jpg2000_app.h"
+
+#include "../common/hal.h"
+#include "../../address_map.h"
+// #include "dycton_jpg2000_app.h" // cannot be included twice
+extern const char * dataset_array[];					
+extern uint32_t dataset_footprint[];
+extern uint32_t dataset_in_size[];
+extern uint32_t dataset_out_size[];
+
+#define JPG2000_IN_FILE_PATH dataset_array[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define JPG2000_IN_FILE_SZ dataset_in_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define JPG2000_OUT_FILE_SZ dataset_out_size[read_mem(HELPER_BASE + DATASET_INDEX)]
+#define JPG2000_IN_ADDR                (DENSE_MEM_BASE)
+#define JPG2000_OUT_ADDR               (DENSE_MEM_BASE + (DENSE_MEM_SIZE/2))
+
 
 /******************************************************************************\
 * Local function prototypes.
@@ -807,7 +821,7 @@ int jas_stream_fillbuf(jas_stream_t *stream, int getflag)
 			stream->flags_ |= JAS_STREAM_EOF;
 		}
 		stream->cnt_ = 0;
-		printf("error, returning EOF\n");
+		printf("returning EOF\n");
 		return EOF;
 	}
 

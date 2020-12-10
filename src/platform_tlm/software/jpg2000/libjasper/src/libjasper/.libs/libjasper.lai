@@ -14,7 +14,7 @@ library_names=''
 old_library='libjasper.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/data_ssd/simulateur/dycton/src/platform_tlm/software/common/ -lm'
+dependency_libs=' -lm'
 
 # Version information for libjasper.
 current=1

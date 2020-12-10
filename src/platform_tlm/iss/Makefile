@@ -12,7 +12,7 @@ ROOT=..
 include $(ROOT)/Makefile.common
 
 EXTRALDLIBS += -L../hardware -lhardware -L../elf-loader -lloader
-CXXEXTRAFLAGS = -I../hardware -I.. -D$(DY_SOFT) -DDY_ARCH=$(DY_ARCH)
+CXXEXTRAFLAGS = -I../hardware -I.. -D$(DY_SOFT)
 CEXTRAFLAGS = -I.
 
 
@@ -32,7 +32,7 @@ software: sc_main_iss.o
 	@echo "[DYCTON] targeted software build: " $(DY_SOFT)
 	@echo "--------------------------------------------------"
 	@echo "\033[0m"
-	cd ../software/$(DY_SOFT)/cross && $(MAKE) DY_ARCH=$(DY_ARCH) DY_SOFT=$(DY_SOFT)
+	@cd ../software/$(DY_SOFT)/cross && $(MAKE) DY_SOFT=$(DY_SOFT)
 
 
 .PHONY: hardware lib-loader
@@ -42,7 +42,7 @@ hardware:
 	@echo "[DYCTON] simulation hardware components build"
 	@echo "--------------------------------------------------"
 	@echo "\033[0m"
-	@cd ../hardware && $(MAKE) DY_ARCH=$(DY_ARCH) DY_SOFT=$(DY_SOFT)
+	@cd ../hardware && $(MAKE) DY_SOFT=$(DY_SOFT)
 
 lib-loader:
 	@echo "\033[01;34m"
@@ -66,9 +66,6 @@ else
     ifeq ($(wildcard ../software/$(DY_SOFT)/.*),)
     	$(error DY_SOFT directory doesn't exist)
     endif
-endif
-ifndef DY_ARCH
-    $(error DY_ARCH must be set (for example DY_ARCH=0))
 endif
 
 # Include dependency files

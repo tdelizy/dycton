@@ -1,6 +1,30 @@
 
 #include "libdycton.h"
 
+/* This file derivates from newlib malloc.c
+ * this implementation is simplified for the project 
+ * (we run on bare metal, single core)
+ * 
+ * adaptations : most of the declaration / definitions have been moved to libdycton
+ * in this file we replaced the different variables used by malloc by dereferenced 
+ * pointer equivalent in order to allow the dispatcher to change the targeted heap 
+ * of te algorithm.
+ *
+ * DL_Malloc adaptation o multi heap.
+ * in our conditions, multi heap implies one small fast heap and one big slow heap.
+ * this means that the case where we try to allocate in fast heap, fails and then
+ * allocates in slow can be common.
+ * to cope with the slowness of finding out that the fast heap is full we maintain
+ * the "biggest free block size" in order to fast fail when we must.
+ * to avoid most of the cost of maintaining this information we update it only when
+ * malloc fails to find a big enougth bloc.
+ * we check when freeing a bloc if thats increase the biggest free bloc size as it
+ * doesn't require any additionnal list exploration
+ *
+ * Tristan Delizy, 2019
+ */
+
+
 
 /* ---------- To make a malloc.h, start cutting here ------------ */
 
@@ -1032,7 +1056,7 @@ extern Void_t*     sbrk();
 #if __STD_C
 
 Void_t* mALLOc(RARG size_t);
-void    fREe(RARG Void_t*);
+uint32_t    fREe(RARG Void_t*);
 Void_t* rEALLOc(RARG Void_t*, size_t);
 Void_t* mEMALIGn(RARG size_t, size_t);
 Void_t* vALLOc(RARG size_t);
@@ -1046,7 +1070,7 @@ int     mALLOPt(RARG int, int);
 struct mallinfo mALLINFo(RONEARG);
 #else
 Void_t* mALLOc();
-void    fREe();
+uint32_t    fREe();
 Void_t* rEALLOc();
 Void_t* mEMALIGn();
 Void_t* vALLOc();
@@ -2225,7 +2249,10 @@ Void_t* mALLOc(RARG bytes) RDECL size_t bytes;
     if (chunksize(top) < nb || remainder_size < (long)MINSIZE)
     {
         /* Try to extend */
-        malloc_extend_top(RCALL alloc_context->heap_max_size);
+        // dycton optim : we sbrk all disponible memory for this heap at first sbrk (setting heap_end to not 0), dont' try to get more and fail.
+        if(alloc_context->heap_end == 0){
+          malloc_extend_top(RCALL (alloc_context->heap_max_size-4));
+        }
         remainder_size = long_sub_size_t(chunksize(top), nb);
         if (chunksize(top) < nb || remainder_size < (long)MINSIZE)
         {
@@ -2293,9 +2320,9 @@ Void_t* mALLOc(RARG bytes) RDECL size_t bytes;
 
 
 #if __STD_C
-void fREe(RARG Void_t* mem)
+uint32_t fREe(RARG Void_t* mem)
 #else
-void fREe(RARG mem) RDECL Void_t* mem;
+uint32_t fREe(RARG mem) RDECL Void_t* mem;
 #endif
 {
 #ifdef MALLOC_PROVIDED
@@ -2307,6 +2334,7 @@ void fREe(RARG mem) RDECL Void_t* mem;
     mchunkptr p;         /* chunk corresponding to mem */
     INTERNAL_SIZE_T hd;  /* its head field */
     INTERNAL_SIZE_T sz;  /* its size */
+    INTERNAL_SIZE_T free_sz; /* size of targetted chunk*/
     int       idx;       /* its bin index */
     mchunkptr next;      /* next contiguous chunk */
     INTERNAL_SIZE_T nextsz; /* its size */
@@ -2317,7 +2345,7 @@ void fREe(RARG mem) RDECL Void_t* mem;
 
     if (mem == 0) {                             /* free(0) has no effect */
 
-        return;
+        return 0;
     }
 
     MALLOC_LOCK;
@@ -2330,11 +2358,12 @@ void fREe(RARG mem) RDECL Void_t* mem;
     {
         munmap_chunk(p);
         MALLOC_UNLOCK;
-        return;
+        return hd & ~PREV_INUSE;
     }
 #endif
 
     sz = hd & ~PREV_INUSE;
+    free_sz = sz;
     next = chunk_at_offset(p, sz);
     nextsz = chunksize(next);
 
@@ -2369,7 +2398,7 @@ void fREe(RARG mem) RDECL Void_t* mem;
 #endif
 
         MALLOC_UNLOCK;
-        return;
+        return free_sz;
     }
 
 
@@ -2413,6 +2442,7 @@ void fREe(RARG mem) RDECL Void_t* mem;
 #endif
     MALLOC_UNLOCK;
 
+    return free_sz;
 #endif /* MALLOC_PROVIDED */
 }
 

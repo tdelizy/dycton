@@ -18,9 +18,11 @@ EXEC = a.out
 
 $(EXEC): $(OBJS) ../../common/ldscript
 	$(TARGET_LD) -q $(CROSS_LDFLAGS) $(OBJS) -o $@ -T../../common/ldscript -L../ -ljasper  -L../../common -lc -lm $(LIBGCC)
+	$(TARGET_OBJDUMP) a.out -fpwd > a.asm
+	$(TARGET_OBJDUMP) a.out -t > symbol_table.txt
 	cp a.out ../../a.out
 
-jasper.o: ../jasper.c ../../../address_map.h ../../common/hal.h ../jpg2000_app.h
+jasper.o: ../jasper.c ../../../address_map.h ../../common/hal.h ../dycton_jpg2000_app.h
 	$(TARGET_CC) $(TARGET_CFLAGS) -c $< -o $@
 
 hal.o: ../../common/hal.c ../../../address_map.h ../../common/hal.h

@@ -1,4 +1,27 @@
 #!/bin/bash
+
+
+# This file is part of the Dycton project scripts.
+# This software aims to provide an environment for Dynamic Heterogeneous Memory 
+# Allocation for embedded devices study.
+
+# Copyright (C) 2019  Tristan Delizy, CITI Lab, INSA de Lyon
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
 # script for running a program and plot its heap behavior
 # >>>>>input : the command line to execute (for example "program arg1 arg2 ...")
 # <<<<<output : a timestamped folder containing the plot of heap behavior and much logs
@@ -62,7 +85,7 @@ gawk -i inplace 'BEGIN{FS=":";OFS=":";} {if($4!=0){ print; }}' malloc_trace
 
 ################################# plot allocation boxes from ltrace log
 #launch python script for plotting
-python /data_ssd/simulateur/dycton/scripts/log_process_old.py malloc_trace
+python /data_ssd/simulateur/dycton/src/scripts/log_process_old.py malloc_trace
 
 ################################# put results in a timestamped folder
 for arg in "$@"

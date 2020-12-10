@@ -1,0 +1,364 @@
+{
+  "id":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+  "url": "lorem ipsum",
+  "name": "lorem ipsum",
+  "type": "lorem ipsum",
+  "language": "lorem ipsum",
+  "genres": [
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum"
+  ],
+  "status": "lorem ipsum",
+  "runtime":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+  "premiered": "lorem ipsum",
+  "officialSite": "lorem ipsum",
+  "schedule": {
+    "time": "lorem ipsum",
+    "days": [
+      "lorem ipsum"
+    ]
+  },
+  "rating": {
+    "average": 12
+  },
+  "weight":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+  "network": {
+    "id":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+    "name": "lorem ipsum",
+    "country": {
+      "name": "lorem ipsum",
+      "code": "lorem ipsum",
+      "timezone": "lorem ipsum"
+    }
+  },
+  "webChannel": {
+    "id":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+    "name": "lorem ipsum",
+    "country": {
+      "name": "lorem ipsum",
+      "code": "lorem ipsum",
+      "timezone": "lorem ipsum"
+    }
+  },
+  "externals": {
+    "tvrage":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+    "thetvdb":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+    "imdb": "lorem ipsum"
+  },
+  "image": {
+    "medium": "lorem ipsum",
+    "original": "lorem ipsum"
+  },
+  "summary": "lorem ipsum",
+  "updated":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+  "_links": {
+    "self": {
+      "href": "lorem ipsum"
+    },
+    "previousepisode": {
+      "href": "lorem ipsum"
+    }
+  },
+  "_embedded": {
+    "episodes": [
+      {
+        "id":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+        "url": "lorem ipsum",
+        "name": "lorem ipsum",
+        "season":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+        "number":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+        "airdate": "lorem ipsum",
+        "airtime": "lorem ipsum",
+        "airstamp": "lorem ipsum",
+        "runtime":{
+    "string" : "lorem ipsum",
+    "utf string" : "\u006corem\u0020ipsum",
+    "surrogate string": "lorem\uD834\uDD1Eipsum\uD834\uDF67lorem",
+    "positive one" : 1,
+    "negative one" : -1,
+    "pi" : 3.14,
+    "hard to parse number" : -3.14e-4,
+    "big int": 2147483647,
+    "big uint": 4294967295,
+    "boolean true" : true,
+    "boolean false" : false,
+    "null" : null,
+    "string array" : ["lorem", "ipsum"],
+    "x^2 array" : [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+    "object" : { "nested string" : "str",
+                 "nested true" : true,
+                 "nested false" : false,
+                 "nested null" : null,
+                 "nested number" : 123,
+                 "nested array" : ["lorem", "ipsum"],
+                 "nested object" : {"lorem": "ipsum"}
+    }
+},
+        "image": {
+          "medium": "lorem ipsum",
+          "original": "lorem ipsum"
+        },
+        "summary": "lorem ipsum",
+        "_links": {
+          "self": {
+            "href": "lorem ipsum"
+          }
+        }
+      }
+    ]
+  }
+}

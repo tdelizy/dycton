@@ -1,4 +1,19 @@
 
+/********************************************************************
+ * Copyright (C) 2009, 2012 by Verimag                              *
+ * Initial author: Matthieu Moy                                     *
+ *                                                                  *
+ * Inclusion and adaptation : Tristan Delizy, 2019                  *
+ ********************************************************************/
+
+/*
+ * Now contains the stub and implementation for newlib syscalls
+ * in this project we implemented "write" and "sbrk", the others are stubbed
+ *
+ * ref : https://www.embecosm.com/appnotes/ean9/ean9-howto-newlib-1.0.html#sec_syscalls
+ */
+
+
 #include <sys/stat.h>
 #include <sys/times.h>
 #include <errno.h>
@@ -14,10 +29,6 @@ extern Heap_ctx * alloc_context;
 
 void _exit(int level)
 {
-    // printf("\n");   // IMPORTANT : this forces the flush of stream "files" maintained by the newlib
-                    // if not present everything printed using printf between the last '\n' and the
-                    // exit call will be ignored. (specific behavior to "newlib-nano" options in newlib)
-                    // this is a terrible idea : the libc being reentrant if heap isn't initialised, this explodes horribly
 #ifdef HELPER_BASE
     (*((int*)HELPER_BASE) = level);
 #else
@@ -244,14 +255,21 @@ caddr_t sbrk(int incr) {
     }
 
     prev_heap_end = alloc_context->heap_end;
+#ifdef SYSCALL_PRINT
+    simple_print("==> prev_heap_end ="); simple_print_dec(prev_heap_end); simple_print("\n");
+#endif
+
     if(alloc_context->heap_end + incr > (alloc_context->heap_base + alloc_context->heap_max_size)) {
+#ifdef SYSCALL_PRINT
+        simple_print("sbrk return 0 : not enougth space to extend this heap\n");
+#endif
         return 0;
     }
+    alloc_context->heap_end += incr;
 #ifdef SYSCALL_PRINT
     simple_print("==> new_heap_end ="); simple_print_dec(alloc_context->heap_end); simple_print("\n");
-    simple_print("TOTAL SBRKed MEM ="); simple_print_dec(alloc_context->heap_end - HEAP_BASE); simple_print("\n");
+    simple_print("TOTAL SBRKed MEM ="); simple_print_dec(alloc_context->heap_end - alloc_context->heap_base); simple_print("\n");
 #endif
-    alloc_context->heap_end += incr;
     return (caddr_t) prev_heap_end;
 }
 

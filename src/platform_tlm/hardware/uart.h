@@ -1,6 +1,9 @@
+
 /********************************************************************
- * Copyright (C) 2012 by Verimag                                    *
+ * Copyright (C) 2009, 2012 by Verimag                              *
  * Initial author: Matthieu Moy                                     *
+ *                                                                  *
+ * Inclusion and adaptation : Tristan Delizy, 2019                  *
  ********************************************************************/
 
 /*!

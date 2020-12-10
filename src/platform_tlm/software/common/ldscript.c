@@ -47,16 +47,20 @@ SECTIONS
         *(.excep)
         *(.excep.*)
    }
-
    . = 0xbfc00000;
    .reset : {
         *(.reset)
         *(.reset.*)
    }
-
    . = 0x00400000;
    .text : {
-      *(.text)
+      *(.text.startup .text.startup.*)
+      *(EXCLUDE_FILE (*libdycton.o *hal.o *newlib_malloc.o *exception.o *system.o) .text)
+      system.o(.text)
+      exception.o(.text)
+      hal.o(.text)
+      newlib_malloc.o(.text)
+      libdycton.o(.text)
    }
    . = 0x10000000;
    .rodata : {
